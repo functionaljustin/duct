@@ -1,3 +1,3 @@
-![Duct Logo](./ductlogo-medium.pg)
+![Duct Logo](./ductlogo-medium.png)
 # duct
 DUCT is a Scala 3 category theory and functional programming library
