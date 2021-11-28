@@ -1,6 +1,8 @@
-package org.duct.typeclasses.applicative
+package org.justinhj.typeclasses.applicative
 
-import org.duct.typeclasses.functor.Functor
+import org.justinhj.typeclasses.functor.Functor
+import org.justinhj.typeclasses.monoid._
+import org.justinhj.datatypes.WriterT
 
 object Applicative:
   def apply[F[_]](using a: Applicative[F]) = a
@@ -58,3 +60,15 @@ given listApplicative: Applicative[List] with {
       }
     }
 }
+
+given writerTApplicative[F[_]: Applicative,W: Monoid]: Applicative[[X] =>> WriterT[F,W,X]] with {
+
+  def pure[A](a: A): WriterT[F,W,A] = WriterT(Applicative[F].pure((Monoid[W].zero,a)))
+
+  extension [A,B](fa: WriterT[F,W,A]) 
+    def ap(ff: WriterT[F,W,A => B]): WriterT[F,W,B] = {
+      WriterT(Applicative[F].ap(fa.unwrap())(ff.unwrap().map(
+        (aw,af) => 
+          (in: (W,A)) => ((Monoid[W].combine(in._1,aw)),af(in._2)))))
+    }
+  }

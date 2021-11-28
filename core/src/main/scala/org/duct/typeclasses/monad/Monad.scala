@@ -1,9 +1,9 @@
-package org.duct.typeclasses.monad
+package org.justinhj.typeclasses.monad
 
-import org.duct.typeclasses.applicative.Applicative
-import org.duct.typeclasses.functor.Functor
-import org.duct.datatypes._
-import org.duct.typeclasses.monoid.{given, _}
+import org.justinhj.typeclasses.applicative.Applicative
+import org.justinhj.typeclasses.functor.Functor
+import org.justinhj.datatypes._
+import org.justinhj.typeclasses.monoid.{given, _}
 
 object Monad:
   def apply[F[_]](using m: Monad[F]) = m
@@ -68,9 +68,9 @@ given writerTMonad[F[_]: Monad,W: Monoid]: Monad[[X] =>> WriterT[F,W,X]] with {
   def pure[A](a: A): WriterT[F,W,A] = WriterT(Monad[F].pure((Monoid[W].zero,a)))
 
   extension [A,B](fa: WriterT[F,W,A]) def flatMap(f: A => WriterT[F,W,B]) = {
-     val ffa: F[(W,B)] = Monad[F].flatMap(fa.wrapped) {
+     val ffa: F[(W,B)] = Monad[F].flatMap(fa.unwrap()) {
        case (wa,a) => {
-         f(a).wrapped.map {
+         f(a).unwrap().map {
            case (wb, b) =>
              (Monoid[W].combine(wa,wb), b)
          }
