@@ -1,4 +1,4 @@
-![Duct Logo](./images/ductlogo-small.png | width=400)
+<img src="./images/ductlogo-small.png" width="400" alt="Duct Logo">
 # Welcome to the DUCT library!
 
 DUCT is a functional programming library for Scala. Following in the footsteps of Scalaz and Cats, DUCT brings powerful and principled abstractions from Category Theory to Scala. 
