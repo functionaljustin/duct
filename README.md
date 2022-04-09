@@ -12,6 +12,16 @@ Following in the footsteps of Scalaz and Cats, DUCT brings powerful and principl
 * Watch videos of the development at [Functional Justin](https://www.youtube.com/c/FunctionalJustin)
 * Straightforward and readable sample code with realistic problems and their solutions.
 * Scala 3 first. No backwards compatibility.
+* Compromise performance and applicability over simplicity.
+
+# What you don't get in the tin
+
+* No IO type (yet)
+* Stack safety
+
+# Documentation
+
+There is none yet apart from the related blogs and videos linked throughout the code.
 
 [^1]: Before Scala 3 was known as such it was known as [Dotty](https://dotty.epfl.ch/). 
 
