@@ -1,6 +1,6 @@
 package duct.examples
 
-object HelloDuct:
+object HelloDuct extends App:
     println("hello!")
 
 

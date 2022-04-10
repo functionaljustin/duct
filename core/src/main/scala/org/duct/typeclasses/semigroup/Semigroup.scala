@@ -1,4 +1,4 @@
-package org.justinhj.typeclasses.semigroup
+package org.duct.typeclasses.semigroup
 
 trait Semigroup[A]:
   def combine(al: A, ar: A): A

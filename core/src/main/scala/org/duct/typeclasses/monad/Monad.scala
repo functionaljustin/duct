@@ -1,9 +1,9 @@
-package org.justinhj.typeclasses.monad
+package org.duct.typeclasses.monad
 
-import org.justinhj.typeclasses.applicative.Applicative
-import org.justinhj.typeclasses.functor.Functor
-import org.justinhj.datatypes._
-import org.justinhj.typeclasses.monoid.{given, _}
+import org.duct.typeclasses.applicative.Applicative
+import org.duct.typeclasses.functor.Functor
+import org.duct.datatypes._
+import org.duct.typeclasses.monoid.{given, _}
 
 object Monad:
   def apply[F[_]](using m: Monad[F]) = m

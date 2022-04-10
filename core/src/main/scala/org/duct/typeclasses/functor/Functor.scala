@@ -1,4 +1,4 @@
-package org.justinhj.typeclasses.functor
+package org.duct.typeclasses.functor
 
 object Functor:
   def apply[F[_]](using f: Functor[F]) = f
