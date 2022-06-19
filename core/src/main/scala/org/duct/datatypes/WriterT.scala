@@ -15,7 +15,7 @@ case class WriterT[F[_],W,A](val wrapped: F[(W,A)]):
   def tell(l1: W)(using m: Monoid[W], f: Functor[F]): WriterT[F,W,A] =
     WriterT(wrapped.map{
       (l2,a) =>
-        (m.combine(l2, l1), a)
+        (l2.combine(l1), a)
     })
 
   // tell let's us write to the log without affecting the current computed value
@@ -23,7 +23,7 @@ case class WriterT[F[_],W,A](val wrapped: F[(W,A)]):
   def tellWith(faw: A => W)(using m: Monoid[W], f: Functor[F]): WriterT[F,W,A] =
     WriterT(wrapped.map{
       (l2,a) =>
-        (m.combine(l2, faw(a)), a)
+        (l2.combine(faw(a)), a)
     })
     
   // written is so you can grab the log

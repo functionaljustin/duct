@@ -1,13 +1,16 @@
 package org.duct.typeclasses.semigroup
 
 trait Semigroup[A]:
-  def combine(al: A, ar: A): A
+  extension (left: A)
+    def combine(right: A): A
 
 object Semigroup:
   def apply[A](using s: Semigroup[A]) = s
 
 given stringSemigroup: Semigroup[String] with
-  def combine(al:String, ar:String) = al + ar
+  extension (left: String)
+    def combine(right:String) = left + right
 
 given listSemigroup[A]: Semigroup[List[A]] with
-  def combine(al:List[A], ar:List[A]) = al ++ ar
+  extension (left: List[A])
+    def combine(right:List[A]) = left ++ right

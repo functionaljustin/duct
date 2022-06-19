@@ -1,25 +1,18 @@
-val useScalaVersion = "3.1.1" 
+val scala3Version = "3.1.2"
 
-lazy val duct = project
-  .in(file("duct"))
+lazy val core = project
   .settings(
     name := "duct",
-    version := "0.1.0",
-    scalaVersion := useScalaVersion,
+    version := "0.1.0-SNAPSHOT",
+    scalaVersion := scala3Version,
+    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+  )
 
-    libraryDependencies ++= Seq(
-      "com.novocode" % "junit-interface" % "0.11" % "test"
-    ))
-
-lazy val ductExamples = project
-  .in(file("examples"))
+lazy val examples = project
+  .dependsOn(core)
   .settings(
-    name := "duct-examples",
-    version := "0.1.0",
-
-    scalaVersion := useScalaVersion,
-
-    libraryDependencies ++= Seq(
-      "com.novocode" % "junit-interface" % "0.11" % "test"
-    ))
-
+    name := "examples",
+    version := "0.1.0-SNAPSHOT",
+    scalaVersion := scala3Version,
+    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+  )

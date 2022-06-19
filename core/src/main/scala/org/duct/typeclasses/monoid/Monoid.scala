@@ -10,8 +10,10 @@ object Monoid:
 
 given stringMonoid: Monoid[String] with
   def zero = ""
-  def combine(al:String, ar:String) = al + ar
+  extension (al: String)
+      def combine(ar:String) = al + ar
 
 given listMonoid[A]: Monoid[List[A]] with
   def zero = List.empty[A]
-  def combine(al:List[A], ar:List[A]) = al ++ ar
+  extension (al: List[A])
+    def combine(ar:List[A]) = al ++ ar
