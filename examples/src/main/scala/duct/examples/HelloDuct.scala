@@ -9,6 +9,11 @@ object HelloDuct extends App:
   val e3 = List(" ", "of", " ", "semigroup", " ")
   val e4 = List("combination")
 
-  println(e1.combine(e2))
+  val combine1 = e1.combine(e2)
+  val combine2 = e3.combine(e4)
+  val combineAll = combine1.combine(combine2)
 
-
+  combineAll.foreach {
+    s => print(s)
+  }
+  print("\n")
