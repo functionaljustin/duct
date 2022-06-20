@@ -1,9 +1,15 @@
+// Functional Justin https://youtu.be/t7rfvpd9mD0
+// Ep 12: ReaderT is good for the environment
+// Sorry for the pun. In this example I use ReaderT to represent
+// the symbol table during an expression evaluation, where 
+// formerly we used a context function that provided the 
+// environment as an implicit...
 
 object Video12 extends App:
 
   import org.justinhj.duct.typeclasses.monad.{eitherMonad, _}
-  import org.justinhj.duct.typeclasses.numeric.{given, _}
-  import org.justinhj.duct.datatypes.{given, _}
+  import org.justinhj.duct.typeclasses.numeric.{_, given}
+  import org.justinhj.duct.datatypes.{ReaderT, given}
 
   import Exp._
   import Video12._
