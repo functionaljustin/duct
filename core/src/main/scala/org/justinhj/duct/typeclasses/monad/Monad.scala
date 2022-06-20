@@ -5,6 +5,9 @@ import org.justinhj.duct.typeclasses.functor.Functor
 import org.justinhj.duct.datatypes._
 import org.justinhj.duct.typeclasses.monoid.{given, _}
 
+// Functional Justin https://youtu.be/B1FSxbmZpCE
+// Ep 7: Monads with Scala 3 for the Genius
+
 object Monad:
   def apply[F[_]](using m: Monad[F]) = m
 

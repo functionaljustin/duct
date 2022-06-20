@@ -21,4 +21,7 @@ class SemigroupSuite extends munit.FunSuite {
     val aAndbc = a.combine(bc)
     assertEquals(abAndc,aAndbc)
   }
+  test("|+| operator for string") {
+    assertEquals("This test passes", "This test " |+| "passes")
+  }
 }

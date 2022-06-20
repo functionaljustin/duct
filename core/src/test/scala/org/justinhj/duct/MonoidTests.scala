@@ -15,6 +15,10 @@ class MonoidSuite extends munit.FunSuite {
     val aAndbc = a.combine(bc)
     assertEquals(abAndc,aAndbc)
   }
+  test("|+| operator for list") {
+    assertEquals(List(1,2,3), List(1,2) |+| List(3))
+    assertEquals(List(1,2,3), listMonoid.zero |+| List(1,2,3))
+  }
   test("left and right identity of string monoid") {
     assertEquals("left side", "left side".combine(stringMonoid.zero))
     assertEquals("right side", stringMonoid.zero.combine("right side"))
