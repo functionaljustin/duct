@@ -1,7 +1,6 @@
 import org.justinhj.duct.typeclasses.monoid.{given,*}
 
 class MonoidSuite extends munit.FunSuite {
-  // List monoid
   test("left and right identity of list monoid") {
     assertEquals(List(1,2,3), List(1,2,3).combine(listMonoid.zero))
     assertEquals(List(1,2,3), listMonoid.zero.combine(List(1,2,3)))
@@ -16,7 +15,6 @@ class MonoidSuite extends munit.FunSuite {
     val aAndbc = a.combine(bc)
     assertEquals(abAndc,aAndbc)
   }
-  // String monoid
   test("left and right identity of string monoid") {
     assertEquals("left side", "left side".combine(stringMonoid.zero))
     assertEquals("right side", stringMonoid.zero.combine("right side"))
