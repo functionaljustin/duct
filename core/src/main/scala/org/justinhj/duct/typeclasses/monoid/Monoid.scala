@@ -1,6 +1,6 @@
-package org.duct.typeclasses.monoid
+package org.justinhj.duct.typeclasses.monoid
 
-import org.duct.typeclasses.semigroup.Semigroup
+import org.justinhj.duct.typeclasses.semigroup.Semigroup
 
 trait Monoid[A] extends Semigroup[A]:
   def zero: A

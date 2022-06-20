@@ -1,4 +1,4 @@
-package org.duct.typeclasses.semigroup
+package org.justinhj.duct.typeclasses.semigroup
 
 trait Semigroup[A]:
   extension (left: A)

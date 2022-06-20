@@ -1,4 +1,4 @@
-package org.duct.typeclasses.numeric
+package org.justinhj.duct.typeclasses.numeric
 
 // Extension methods allow one to add methods to a type after the type is defined
   // Which is the essence of type classes!

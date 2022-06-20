@@ -1,9 +1,9 @@
-package org.duct.datatypes
+package org.justinhj.duct.datatypes
 
-import org.duct.typeclasses.monad.Monad
-import org.duct.typeclasses.functor.Functor
-import org.duct.typeclasses.applicative.Applicative
-import org.duct.typeclasses.monoid.{given,_}
+import org.justinhj.duct.typeclasses.monad.Monad
+import org.justinhj.duct.typeclasses.functor.Functor
+import org.justinhj.duct.typeclasses.applicative.Applicative
+import org.justinhj.duct.typeclasses.monoid.{given,_}
 
 object WriterT:
   // lift takes any monadic effect and transforms to a WriterT around that monad

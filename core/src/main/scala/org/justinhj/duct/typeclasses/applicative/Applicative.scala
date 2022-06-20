@@ -1,8 +1,8 @@
-package org.duct.typeclasses.applicative
+package org.justinhj.duct.typeclasses.applicative
 
-import org.duct.typeclasses.functor.Functor
-import org.duct.typeclasses.monoid._
-import org.duct.datatypes.WriterT
+import org.justinhj.duct.typeclasses.functor.Functor
+import org.justinhj.duct.typeclasses.monoid._
+import org.justinhj.duct.datatypes.WriterT
 
 object Applicative:
   def apply[F[_]](using a: Applicative[F]) = a

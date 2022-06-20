@@ -1,6 +1,4 @@
-package duct.examples
-
-import org.duct.typeclasses.semigroup.{given,*}
+import org.justinhj.duct.typeclasses.semigroup.{given,*}
 
 object HelloDuct extends App:
 
