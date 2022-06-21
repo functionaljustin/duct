@@ -12,18 +12,17 @@ Following in the footsteps of Scalaz and Cats, DUCT brings powerful and principl
 * Code and tests written for humans, not compilers.
 * Documented development on YouTube: [Functional Justin](https://www.youtube.com/c/FunctionalJustin) and my [blog](http://justinhj.github.io/).
 * Scala 3 first; no backwards compatibility.
-* Nice documentation.
 
 # Non-goals
 
-* No IO type (yet, a simple Loom based IO may be on the way).
+* No IO type like Zio or Cats Effect. Although a future video and implementation is likely.
 * Stack safety.
 * Performance.
 * Adoption.
 
 # Documentation
 
-Coming soon (probably).
+At some point I may add proper code documentation but for now the code just links back to the video it was created in.
 
 # Warning
 
