@@ -1,7 +1,8 @@
 package org.justinhj.duct.datatypes
 
 case class NonEmptyList[+A](head:A, tail:A*):
-  // List we're appending to must be type A or a super-type
+  // Append a NonEmptyList of type B which must be either the same
+  // type as A or a super-type
   def append[B >: A](right: NonEmptyList[B]): NonEmptyList[B] =
     NonEmptyList(head, (tail :+ right.head) ++ right.tail:_*)
 
