@@ -35,7 +35,7 @@ object Video1 extends App:
         Mul(
           Var("x"),
           Var("y"))))
-  
+ 
   // Provide an environment and eval the expression
   {
     given envMap: Env = Map("x" -> 7, "y" -> 6, "z" -> 22)
