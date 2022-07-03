@@ -3,9 +3,7 @@ val scala3Version = "3.1.2"
 lazy val commonSettings = Seq(
     organization := "org.justinhj",
     version := "0.1.0-SNAPSHOT",
-    scalaVersion := scala3Version,
-    githubOwner := "justinhj",
-    githubRepository := "duct"
+    scalaVersion := scala3Version
     )
 
 lazy val core = project
