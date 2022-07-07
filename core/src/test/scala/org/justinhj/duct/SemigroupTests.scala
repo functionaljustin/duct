@@ -1,4 +1,5 @@
 import org.justinhj.duct.typeclasses.semigroup.{given,*}
+import org.justinhj.duct.datatypes.NonEmptyList
 
 class SemigroupSuite extends munit.FunSuite {
   test("associativity of list semigroup") {
@@ -23,5 +24,10 @@ class SemigroupSuite extends munit.FunSuite {
   }
   test("|+| operator for string") {
     assertEquals("This test passes", "This test " |+| "passes")
+  }
+  test("associativity of semigroup for nonemptylist") {
+    val nel1 = NonEmptyList("Ape", "Boa", "Cat")
+    val nel2 = NonEmptyList("Dog", "Elephant")
+    assertEquals((nel1 |+| nel2).toList, List("Ape", "Boa", "Cat", "Dog", "Elephant"))
   }
 }

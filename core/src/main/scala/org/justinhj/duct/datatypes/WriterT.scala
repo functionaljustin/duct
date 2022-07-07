@@ -34,7 +34,7 @@ case class WriterT[F[_],W,A](val wrapped: F[(W,A)]):
         (l2.combine(l1), a)
     })
 
-  // tell let's us write to the log without affecting the current computed value
+  // tellWith let's us write to the log without affecting the current computed value
   // and we can access the value when making the log
   def tellWith(faw: A => W)(using m: Monoid[W], f: Functor[F]): WriterT[F,W,A] =
     WriterT(wrapped.map{
