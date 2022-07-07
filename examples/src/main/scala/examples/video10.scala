@@ -1,3 +1,5 @@
+package examples
+
 import org.justinhj.duct.typeclasses.monad.{given, _}
 import org.justinhj.duct.typeclasses.numeric.{given, _}
 import org.justinhj.duct.typeclasses.monoid.{given, _}

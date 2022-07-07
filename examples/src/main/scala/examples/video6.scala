@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/3GPXEzO14ZE
 // Ep 6: Functional error handling with applicative in Scala 3
 // Here I covered the functor laws and implementing evaluation

@@ -1,3 +1,5 @@
+package examples
+
 import org.justinhj.duct.datatypes.NonEmptyList
 
 object NonEmptyListDemo extends App:

@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/v2TxejGEzg4
 // Ep 8: Compose Yourself with Scala 3's Opaque Types
 // Here I demo various things you can do with Monoids 

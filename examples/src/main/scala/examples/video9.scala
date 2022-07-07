@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/KMm71HLoy0w
 // Ep 9: Transformers, Monads in Disguise
 import org.justinhj.duct.typeclasses.monad.{given,_}

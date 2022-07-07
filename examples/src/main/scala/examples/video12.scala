@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/t7rfvpd9mD0
 // Ep 12: ReaderT is good for the environment
 // Sorry for the pun. In this example I use ReaderT to represent

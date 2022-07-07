@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/J01u_Dmrx5U
 // Ep 1: Scala 3 Enums, Implicits, and Context Functions
 // Shows how to use context functions and implicits in Scala 3

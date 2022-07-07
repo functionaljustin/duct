@@ -1,3 +1,5 @@
+package examples
+
 // Extension methods allow one to add methods to a type after the type is defined,
 // which is the essence of type classes!
 // Numeric type class in Scala 3

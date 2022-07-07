@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/wNVQ75KM8-4
 // Ep 5: Scala 3 Type lambdas, Functors and error handling
 // Demo of either which allows us to do error handling in a 

@@ -1,3 +1,5 @@
+package examples
+
 // Functional Justin https://youtu.be/B1FSxbmZpCE
 // Ep 7: Monads with Scala 3 for the Genius
 // Here I demonstrate how Monads are a category of Kleisli arrows
