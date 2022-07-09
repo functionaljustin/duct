@@ -87,3 +87,15 @@ given writerTMonad[F[_]: Monad,W: Monoid]: Monad[[X] =>> WriterT[F,W,X]] with {
 // see https://github.com/lampepfl/dotty/issues/11413#
 extension [F[_], A](fa: F[A])(using m: Monad[F])
   def flatMap[B](f: A => F[B]) = m.flatMap(fa)(f)
+
+given nonEmptyListMonad: Monad[NonEmptyList] with
+  def pure[A](a: A): NonEmptyList[A] = NonEmptyList(a)
+
+  extension[A,B](x: NonEmptyList[A])
+    def flatMap(f: A => NonEmptyList[B]): NonEmptyList[B] = {
+      val fs: List[B] = f(x.head).toList
+      val fss: List[B] = fs ++ x.tail.toList.flatMap{a =>
+        f(a).toList
+      }
+      NonEmptyList(fss.head, fss.tail:_*)
+    }
