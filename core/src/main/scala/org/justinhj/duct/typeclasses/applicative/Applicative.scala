@@ -52,6 +52,7 @@ given optionApplicative: Applicative[Option] with {
     }
 }
 
+// TODO Variance work here
 given listApplicative: Applicative[List] with {
   def pure[A](a: A): List[A] = List(a)
 

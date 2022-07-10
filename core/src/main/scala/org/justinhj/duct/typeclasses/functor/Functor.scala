@@ -1,5 +1,7 @@
 package org.justinhj.duct.typeclasses.functor
 
+import org.justinhj.duct.datatypes._
+
 object Functor:
   def apply[F[_]](using f: Functor[F]) = f
 
@@ -21,3 +23,10 @@ given eitherFunctor[Err]: Functor[[X] =>> Either[Err,X]] with
     case Right(a) => Right(f(a))
     case Left(err) => Left(err)
   }
+
+given Functor[NonEmptyList] with
+  extension[A,B](x: NonEmptyList[A])
+    def map(f: A => B): NonEmptyList[B] = {
+      val mapped = x.toList.map(f)
+      NonEmptyList(mapped.head, mapped.tail: _*)
+    }
