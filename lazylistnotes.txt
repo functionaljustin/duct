@@ -1,0 +1,22 @@
+Temp notes about lazy list 
+
+Talk about lazy val first
+
+first steps at lazy list
+
+case class MyLazyList[A](val head: () => A, val tail: Option[MyLazyList[A]]) {
+        lazy val first: A = head()
+        lazy val rest = tail(first)
+}
+
+questions?
+
+how to make an infinite repeated list like (1,1,1,1)
+how to make a computed list like the fibonacci sequence
+
+how to map flatmap and so on 
+
+that type signature tho
+
+final classLazyList[+A] extends AbstractSeq[A] with LinearSeq[A] with LinearSeqOps[A, LazyList, LazyList[A]] with IterableFactoryDefaults[A, LazyList] with Serializable
+
