@@ -18,12 +18,12 @@ object LazyListDemo extends App:
 
   object OurLazyList:
     def fromSeq[A](in: Seq[() => A]): OurLazyList[A] = {
-        in match {
-          case first +: rest =>
-            OurLazyList(Some(first), Some(() => fromSeq(rest)))
-          case _ => OurLazyList(None, None)
-        }
+      in match {
+        case first +: rest =>
+          OurLazyList(Some(first), Some(() => fromSeq(rest)))
+        case _ => OurLazyList(None, None)
       }
+    }
 
   // Implementing a lazy list
   class OurLazyList[A](
@@ -37,7 +37,13 @@ object LazyListDemo extends App:
       head match {
         case Some(hd) =>
           OurLazyList(
-            Some(() => f(getHead.get)),
+            {
+              Some(() => {
+                val a = getHead.get
+                println(s"map applying f to $a")
+                f(getHead.get)
+              })
+            },
             getTail.map(ta => () => ta.map(f))
           )
         case None =>
@@ -58,32 +64,42 @@ object LazyListDemo extends App:
     //   }
     // }
 
-    def filter(f: A => Boolean): OurLazyList[A] = {
+    def dropWhile(f: A => Boolean): OurLazyList[A] = {
       head match {
         case Some(hd) =>
           val a = getHead.get
-          println(s"filter sees a $a")
-          val filterResult = f(a)
-          if (filterResult) {
-            val what = getTail.map(ta => ta.filter(f))
-            what.getOrElse(OurLazyList(None,None))
+          if (f(a)) {
+            getTail
+              .map(ta => ta.dropWhile(f))
+              .getOrElse(OurLazyList(None, None))
           } else {
-            OurLazyList(Some(() => a), getTail.map(ta => () => ta.filter(f)))
+            OurLazyList(Some(() => a), getTail.map(ta => () => ta.dropWhile(f)))
           }
         case None =>
           OurLazyList(None, None)
       }
     }
 
+    def filter(f: A => Boolean): OurLazyList[A] = {
+      this.dropWhile(a => !f(a))
+    }
+
     def forEach(f: A => Unit): Unit = {
       def forEachHelper(f: A => Unit, in: OurLazyList[A]): Unit = {
         in.getHead.foreach(a =>
+          println(s"foreach sees $a")
           f(a)
           in.getTail.foreach(tail => forEachHelper(f, tail))
         )
       }
       forEachHelper(f, this)
     }
+
+    // creation
+    def ##::(newHead: => A): OurLazyList[A] = {
+      OurLazyList(Some(() => newHead), Some(() => this))
+    }
+
   }
 
   def evalNum(n: Int) = {
@@ -93,11 +109,14 @@ object LazyListDemo extends App:
 
   println("list things")
 
-  val l1 = List(1,2,3).map(a => () => evalNum(a))
+  val l1 = (1 to 4).map(a => () => evalNum(a))
   val lazyL1 = OurLazyList.fromSeq(l1)
   val lazyL2 = lazyL1.map(_ + 1)
-  val lazyL3 = lazyL2.filter(_ % 2 == 1)
+  val lazyL3 = lazyL2.filter(_ % 2 == 0)
   // val lazyL4 = lazyL2.map(_ + 5)
+  // val dropped = lazyL1.dropWhile(_ < 5)
+
+  println("foreach")
 
   // println("l1")
   // lazyL1.forEach(a => println(a))
@@ -107,3 +126,12 @@ object LazyListDemo extends App:
   lazyL3.forEach(a => println(a))
   // println("l4")
   // lazyL4.forEach(a => println(a))
+
+  // println("dropped")
+  // dropped.forEach(a => println(a))
+
+  val lazyConsedList1 =
+    evalNum(1) ##:: evalNum(2) ##:: evalNum(3) ##:: OurLazyList(None, None)
+  lazyConsedList1.forEach(a => println(s"crazy!$a"))
+
+  // TODO enough for fib seq need tail and zip

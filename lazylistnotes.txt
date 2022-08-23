@@ -20,3 +20,15 @@ that type signature tho
 
 final classLazyList[+A] extends AbstractSeq[A] with LinearSeq[A] with LinearSeqOps[A, LazyList, LazyList[A]] with IterableFactoryDefaults[A, LazyList] with Serializable
 
+how to make filter
+  note filter consumes to the first thing that passes, it is not fully lazy
+
+
+Scala library notes
+
+notes about how the head is not held on to when dropping and filtering
+
+https://github.com/scala/scala/blob/4b2151cbe4c857d49556b70c3fa0f5e236fd7754/src/library/scala/collection/immutable/LazyList.scala#L997
+
+
+
