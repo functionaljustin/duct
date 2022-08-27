@@ -6,13 +6,9 @@ object LazyListDemo extends App:
     lazy val get = a
   }
 
-  def f1 = {
-    println("eval 10")
-    10
-  }
+  val lazyThing1 = LazyThing({ println("side effect"); 11 })
 
-  val lazyThing1 = LazyThing(f1)
-
+  println("Print lazy thing twice...")
   println(lazyThing1.get)
   println(lazyThing1.get)
 
@@ -30,6 +26,8 @@ object LazyListDemo extends App:
       head: Option[() => A],
       tail: Option[() => OurLazyList[A]]
   ) {
+    def isEmpty = head.isEmpty
+
     lazy val getHead: Option[A] = head.map(f => f())
     lazy val getTail: Option[OurLazyList[A]] = tail.map(f => f())
 
@@ -51,20 +49,23 @@ object LazyListDemo extends App:
       }
     }
 
-    // def take(n: Int): OurLazyList[A] = {
-    //   head match {
-    //     case Some(hd) =>
-    //       if (n == 0) {
-    //         OurLazyList(None, None)
-    //       } else {
-    //         OurLazyList(Some(() => a), getTail.map(ta => () => ta.filter(f)))
-    //       }
-    //     case None =>
-    //       OurLazyList(None, None)
-    //   }
-    // }
+    // Returns a new lazy list that terminates after n elements
+    def take(n: Int): OurLazyList[A] = {
+      println(s"take $n")
+      head match {
+        case Some(hd) =>
+          if (n == 0) {
+            OurLazyList(None, None)
+          } else {
+            OurLazyList(Some(hd), getTail.map(ta => () => ta.take(n - 1)))
+          }
+        case None =>
+          OurLazyList(None, None)
+      }
+    }
 
     def dropWhile(f: A => Boolean): OurLazyList[A] = {
+      println("dropWhile")
       head match {
         case Some(hd) =>
           val a = getHead.get
@@ -73,7 +74,7 @@ object LazyListDemo extends App:
               .map(ta => ta.dropWhile(f))
               .getOrElse(OurLazyList(None, None))
           } else {
-            OurLazyList(Some(() => a), getTail.map(ta => () => ta.dropWhile(f)))
+            OurLazyList(Some(() => a), getTail.map(ta => () => ta))
           }
         case None =>
           OurLazyList(None, None)
@@ -81,7 +82,34 @@ object LazyListDemo extends App:
     }
 
     def filter(f: A => Boolean): OurLazyList[A] = {
-      this.dropWhile(a => !f(a))
+      println("filter")
+      val rest = this.dropWhile(a => !f(a))
+      if (rest.isEmpty)
+        rest
+      else
+        OurLazyList(
+          rest.getHead.map(a => () => a),
+          rest.getTail.map(ta => () => ta.filter(f))
+        )
+    }
+
+    // Materialize as a list
+    def toList(): List[A] = {
+      val lb = List.newBuilder[A]
+      this.forEach(a => lb.addOne(a))
+      lb.result()
+    }
+
+    // Zip two lazylists together until one of them runs out of things
+    def zip[B](other: OurLazyList[B]): OurLazyList[(A, B)] = {
+      (this.getHead, other.getHead) match {
+        case (Some(hd1), Some(hd2)) =>
+          OurLazyList(
+            Some(() => (hd1, hd2)),
+            this.getTail.map(ta => () => ta.zip(other.getTail.get))
+          )
+        case _ => OurLazyList(None, None)
+      }
     }
 
     def forEach(f: A => Unit): Unit = {
@@ -102,36 +130,26 @@ object LazyListDemo extends App:
 
   }
 
-  def evalNum(n: Int) = {
-    println(s"evaluating $n")
-    n
-  }
+  val l1 = (1 to 20).map(a => () => { println(s"evaluating $a"); a })
 
-  println("list things")
-
-  val l1 = (1 to 4).map(a => () => evalNum(a))
   val lazyL1 = OurLazyList.fromSeq(l1)
-  val lazyL2 = lazyL1.map(_ + 1)
-  val lazyL3 = lazyL2.filter(_ % 2 == 0)
-  // val lazyL4 = lazyL2.map(_ + 5)
-  // val dropped = lazyL1.dropWhile(_ < 5)
+  assert(
+    lazyL1.filter(n => n % 2 == 0).take(5).toList() == List(2, 4, 6, 8, 10)
+  )
 
-  println("foreach")
-
-  // println("l1")
-  // lazyL1.forEach(a => println(a))
-  // println("l2")
-  // lazyL2.forEach(a => println(a))
-  println("l3")
-  lazyL3.forEach(a => println(a))
-  // println("l4")
-  // lazyL4.forEach(a => println(a))
-
-  // println("dropped")
-  // dropped.forEach(a => println(a))
-
-  val lazyConsedList1 =
-    evalNum(1) ##:: evalNum(2) ##:: evalNum(3) ##:: OurLazyList(None, None)
-  lazyConsedList1.forEach(a => println(s"crazy!$a"))
+  val l2 = (1 to 5).map(a => () => { println(s"evaluating $a"); a })
+  val l3 = (1 to 10).map(a => () => { println(s"evaluating $a"); a })
+  val zipped23 = OurLazyList.fromSeq(l2).zip(OurLazyList.fromSeq(l2))
+  assert(zipped23.toList() == List((1, 1), (2, 2), (3, 3), (4, 4), (5, 5)))
 
   // TODO enough for fib seq need tail and zip
+  import scala.math.BigInt
+
+  val fibs: OurLazyList[BigInt] =
+    BigInt(0) ##:: BigInt(1) ##:: // OurLazyList(None,None)
+      fibs.zip(fibs.getTail.getOrElse(OurLazyList(None, None))).map { n =>
+        n._1 + n._2
+      }
+
+  println("poop")
+  // fibs.take(5).foreach(println)
