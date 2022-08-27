@@ -1,5 +1,7 @@
 package examples
 
+import scala.language.postfixOps
+
 object LazyListDemo extends App:
   // example of lazy evaluation
   class LazyThing[A](a: => A) {
@@ -22,7 +24,7 @@ object LazyListDemo extends App:
     }
 
   // Implementing a lazy list
-  class OurLazyList[A](
+  case class OurLazyList[A](
       head: Option[() => A],
       tail: Option[() => OurLazyList[A]]
   ) {
@@ -30,6 +32,16 @@ object LazyListDemo extends App:
 
     lazy val getHead: Option[A] = head.map(f => f())
     lazy val getTail: Option[OurLazyList[A]] = tail.map(f => f())
+
+    // safeTail should return an OurLazyList without evaluating with the head or the tail
+    def safeTail: OurLazyList[A] = {
+      if head.isEmpty || tail.isEmpty then
+        OurLazyList(None,None)
+      else {
+        // val newHead = tail.map(ta => ta().head)
+        OurLazyList(None,None)
+      }
+    }
 
     def map[B](f: A => B): OurLazyList[B] = {
       head match {
@@ -102,14 +114,12 @@ object LazyListDemo extends App:
 
     // Zip two lazylists together until one of them runs out of things
     def zip[B](other: OurLazyList[B]): OurLazyList[(A, B)] = {
-      (this.getHead, other.getHead) match {
-        case (Some(hd1), Some(hd2)) =>
-          OurLazyList(
-            Some(() => (hd1, hd2)),
-            this.getTail.map(ta => () => ta.zip(other.getTail.get))
-          )
-        case _ => OurLazyList(None, None)
-      }
+      if this.isEmpty || other.isEmpty then
+        OurLazyList(None, None)
+      else
+        OurLazyList(Some(() => (this.getHead.get, other.getHead.get)),
+          this.getTail.map(ta => () =>
+            ta.zip(other.getTail.get)))
     }
 
     def forEach(f: A => Unit): Unit = {
@@ -144,12 +154,18 @@ object LazyListDemo extends App:
 
   // TODO enough for fib seq need tail and zip
   import scala.math.BigInt
-
+  // OurLazyList(None,None)
   val fibs: OurLazyList[BigInt] =
-    BigInt(0) ##:: BigInt(1) ##:: // OurLazyList(None,None)
-      fibs.zip(fibs.getTail.getOrElse(OurLazyList(None, None))).map { n =>
+    BigInt(0) ##:: BigInt(1) ##:: fibs.zip(fibs.safeTail).map { n =>
         n._1 + n._2
       }
+  fibs.take(5).forEach(println)
 
-  println("poop")
-  // fibs.take(5).foreach(println)
+   val fibs2: LazyList[BigInt] =
+         BigInt(0) #:: BigInt(1) #::
+           fibs2.zip(fibs2.tail).map{ (a,b) =>
+             println(s"Adding $a and $b")
+             a + b
+           }
+   fibs2.take(5).foreach(println)
+
