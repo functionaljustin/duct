@@ -31,4 +31,19 @@ notes about how the head is not held on to when dropping and filtering
 https://github.com/scala/scala/blob/4b2151cbe4c857d49556b70c3fa0f5e236fd7754/src/library/scala/collection/immutable/LazyList.scala#L997
 
 
+zip.safeTail needs to ...
+be a OurLazyList
+
+given a lazy list make a new lazy list, how?
+
+this = 
+  either a head and no tail 
+    safe to return a new empty list
+  or a head and a tail 
+    new list should have the head of the tail and the tail of the tail
+
+  or no head or tail 
+    result should be an empty list
+
+
 
