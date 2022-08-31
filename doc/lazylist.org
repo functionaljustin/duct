@@ -1,0 +1,151 @@
+* Notes about OurLazyList
+** Video intro
+Talk about lazy val first
+
+first steps at lazy list
+
+#+BEGIN_SRC scala
+case class MyLazyList[A](val head: () => A, val tail: Option[MyLazyList[A]]) {
+        lazy val first: A = head()
+        lazy val rest = tail(first)
+}
+#+END_SRC
+
+questions?
+
+how to make an infinite repeated list like (1,1,1,1)
+how to make a computed list like the fibonacci sequence
+
+how to map flatmap and so on 
+
+that type signature tho
+
+final classLazyList[+A] extends AbstractSeq[A] with LinearSeq[A] with LinearSeqOps[A, LazyList, LazyList[A]] with IterableFactoryDefaults[A, LazyList] with Serializable
+
+how to make filter
+  note filter consumes to the first thing that passes, it is not fully lazy
+
+
+** Scala library notes
+
+doc
+https://www.scala-lang.org/api/2.13.x/scala/collection/immutable/LazyList.html
+src
+https://github.com/scala/scala/blob/v2.13.8/src/library/scala/collection/immutable/LazyList.scala#L240
+
+notes about how the head is not held on to when dropping and filtering
+
+https://github.com/scala/scala/blob/4b2151cbe4c857d49556b70c3fa0f5e236fd7754/src/library/scala/collection/immutable/LazyList.scala#L997
+
+LazyList [LL] is a class, it has a private constructor of `() => State[A]`
+evaluating state is done by referencing "lazy val state"
+
+it has mid evaluation tracking to detect a loop 
+
+it sets stateEvaluated when evaluated
+
+it has known is empty and known is not empty functions that first check stateEvaluatied
+
+head returns state.head and evaluated
+tail returns state.tail and is a LazyList, not necessarily evaluated
+
+there is a force that makes the elements evaluated and checks for loops
+
+when building a new list is wrapped in newLL see later
+
+isEmpty is state eq State.Empty - does it evaluate or not? maybe not because it is doing object comparison
+
+object LazyList
+
+State is defined in the companion
+
+#+BEGIN_SRC scala
+sealed trait State[+A] {
+    def head: A
+    def tail: LazyList[A]
+  }
+#+END_SRC
+
+State.empty is a static object, note it requires covariance
+
+#+BEGIN_SRC scala
+  object Empty extends State[Nothing] {
+      def head: Nothing = throw new NoSuchElementException("head of empty lazy list")
+      def tail: LazyList[Nothing] = throw new UnsupportedOperationException("tail of empty lazy list")
+    }
+#+END_SRC
+
+empty method just points to _empty which is a forced cached empty object
+
+#+BEGIN_SRC scala
+  def empty[A]: LazyList[A] = _empty
+#+END_SRC
+
+State.Cons is a materialized LL with a head and a tail that could be empty
+
+#+BEGIN_SRC scala
+class Cons[A](val head: A, val tail: LazyList[A]) extends State[A]
+#+END_SRC
+
+Creating a lazylist requires a state (which is a head and tail, call
+by name and remaining unevaluated
+#+BEGIN_SRC scala
+def newLL[A](state: => State[A]): LazyList[A] = new LazyList[A](() => state)
+#+END_SRC
+
+#+BEGIN_SRC scala
+def sCons[A](hd: A, tl: LazyList[A]): State[A] = new State.Cons[A](hd, tl)
+#+END_SRC
+
+Construction with #::
+
+#+BEGIN_SRC scala
+
+// Implicit conversion given a 
+val l: () => LazyList[A]
+
+def #:: [B >: A](elem: => B): LazyList[B] = 
+  newLL( // State passed called by name
+    sCons(  // create a state with sCons, this is materialized state
+      elem,  // note this by value
+      newLL( // the tail is a new LL though
+        l().state  // Note the tail is call by name, and when evaluated see below...
+      )
+    )
+  )
+#+END_SRC
+
+eval of l().state
+l (the list being consed) is () => LazyList
+so we execute it and then deref the state
+remember that whatever the state is we are not evaluating it here
+
+tail?
+
+
+
+
+notes
+newLL to create a list
+
+head is call by name (elem)
+
+
+
+** Zip notes
+zip.safeTail needs to ...
+be a OurLazyList
+
+given a lazy list make a new lazy list, how?
+
+this = 
+  either a head and no tail 
+    safe to return a new empty list
+  or a head and a tail 
+    new list should have the head of the tail and the tail of the tail
+
+  or no head or tail 
+    result should be an empty list
+
+
+
