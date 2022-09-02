@@ -141,7 +141,7 @@ object LazyListDemo extends App:
   }
 
   // based on scala lib
-  class Deferrer[A] (private val l: OurLazyList[A]) extends AnyVal {
+  class Deferrer[A] (l: => OurLazyList[A]) {
     def ##::(newHead: => A): OurLazyList[A] = 
       cons(newHead,l)
   }
@@ -202,9 +202,14 @@ object LazyListDemo extends App:
   // the tails content is deferred until the tails empty status, head or tail is
   // evaluated.
 
+  println("eval tail")
   val emptyTail = tailWithSideEffect 
-  val suspended = 1 ##:: tailWithSideEffect // SHOULD not print anything, but it does
-  val tail = suspended.tail // Is not evaluation but should be of type OurLazyList
+  println("suspended")
+  val suspended = 1 ##:: tailWithSideEffect // SHOULD not print anything and doesn't
+  println("suspended3")
+  val suspended3 = cons(1, tailWithSideEffect) // SHOULD not print anything, and also is ok
+  // val tail = suspended.tail // Is not evaluation but should be of type OurLazyList
+  println("suspendedCons")
   val suspendedCons = cons(1,tailWithSideEffect) // Suspends correctly
   suspendedCons.isEmpty // Should unsuspend but does not
 
@@ -237,10 +242,16 @@ object LazyListDemo extends App:
   // the tails content is deferred until the tails empty status, head or tail is
   // evaluated.
 
+  println("check if empty")
   val emptyTail2 = tailWithSideEffect2
+  println("suspend with #::")
   val suspended2 = 1 #:: tailWithSideEffect2 // SHOULD not print anything, but it does in my code
+  println("eval tail")
   val tail2 = suspended2.tail // Is not evaluation but should be of type OurLazyList
+  println("not evalled")
+  println(tail2.isEmpty) // this evals
   // val suspendedCons2 = cons(1,tailWithSideEffect) // Suspends correctly
+  println("check if empty")
   suspended2.isEmpty // Should unsuspend but does not
 
   // Zip two lazy lists with a map function that combines them to some new type
@@ -249,17 +260,15 @@ object LazyListDemo extends App:
     as.zip(bs).map { case (a, b) => f(a, b) }
   }
 
-  // TODO repeat works but only with cons, not with ##::
-  // def repeat[A](a: A): OurLazyList[A] = a ##:: repeat(a)
-  def repeat[A](a: A): OurLazyList[A] = cons(a, repeat(a))
+  def repeat[A](a: A): OurLazyList[A] = a ##:: repeat(a)
 
-  // TODO test zipWith and repeat
-  val ones = repeat(1)
-  val threeFactors = incN(3,3)
-  val zw1 = zipWith(ones,threeFactors){case (a,b) => a * b}
-  zw1.take(10).forEach {
-    println(_)
-  }
+  // test zipWith and repeat (this is okay)
+  // val ones = repeat(1)
+  // val threeFactors = incN(3,3)
+  // val zw1 = zipWith(ones,threeFactors){case (a,b) => a * b}
+  // zw1.take(10).forEach {
+  //   println(_)
+  // }
 
 
   // TODO tranpose needs an implementation of unapply for the pattern match
