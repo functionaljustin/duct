@@ -23,7 +23,18 @@ object LazyList2 extends App:
         OurLazyList.cons(head, tail.take(n - 1))
     }
 
+    def zip[B](other: OurLazyList[B]): OurLazyList[(A,B)] = {
+     if isEmpty || other.isEmpty then
+      OurLazyList.empty
+    else
+      OurLazyList.cons((head,other.head), tail.zip(other.tail))
+    }
 
+    def map[B](f: A => B): OurLazyList[B] = 
+      if isEmpty then
+        OurLazyList.empty
+      else
+        OurLazyList.cons(f(head), tail.map(f))
   }
 
   object OurLazyList:
@@ -90,6 +101,32 @@ object LazyList2 extends App:
   ones.take(5).forEach{ a =>
     println(a)
   }
+
+  // zip
+  val twos = OurLazyList.repeat(2)
+  ones.zip(twos).take(5).forEach{ a =>
+    println(a)
+  }
+
+  // map
+  val threes = OurLazyList.repeat(3)
+  val mapped = threes.take(3).map(_ + 1).forEach {
+    a => println(a)
+  }
+
+  // fibs
+  val fibs2: OurLazyList[BigInt] =
+    BigInt(0) #:: BigInt(1) #::
+      fibs2.zip(fibs2.tail).map { (a, b) =>
+        println(s"Adding $a and $b")
+        a + b
+      }
+  fibs2.take(10).forEach{
+    a => println(a)
+  }
+
+
+
 
 
 
