@@ -1,5 +1,5 @@
 // Reimplement OurLazyList from scratch and better
-// This is a simplified version of Stream from Scala library 2.7 
+// This is a simplified version of Stream from Scala library 2.7
 package examples
 
 object LazyList2 extends App:
@@ -31,7 +31,7 @@ object LazyList2 extends App:
       private var tailValue: OurLazyList[A] = _
 
       def tail: OurLazyList[A] = {
-        if (!tailEvaluated) { 
+        if (!tailEvaluated) {
           tailValue = tl
           tailEvaluated = true
         }
@@ -40,24 +40,36 @@ object LazyList2 extends App:
 
       def isEmpty = false
     }
-  
+
+  class Deferrer[A](tl: => OurLazyList[A]) {
+    def #::(hd: A): OurLazyList[A] =
+      OurLazyList.cons(hd, tl)
+  }
+
+  implicit def toDeferrer[A](l: => OurLazyList[A]): Deferrer[A] =
+    new Deferrer[A](l)
+
   def tailWithSideEffect: OurLazyList[Int] = {
     println("getting empty OurLazyList")
     OurLazyList.empty
   }
 
   println("list1")
-  val list1 = OurLazyList.cons(1, tailWithSideEffect) // SHOULD not print anything, and also is ok
+  val list1 = OurLazyList.cons(
+    1,
+    tailWithSideEffect
+  ) // SHOULD not print anything, and also is ok
 
   list1.tail // this would eval the tail
 
   println("forEach list1")
-  list1.forEach{ a =>
+  list1.forEach { a =>
     println(a)
   }
 
-
-
-
-
-
+  // Constructor
+  val list2: OurLazyList[Int] =
+    (1 #:: 2 #:: 3 #:: 4 #:: 5 #:: OurLazyList.empty)
+  list2.forEach { a =>
+    println(a)
+  }
