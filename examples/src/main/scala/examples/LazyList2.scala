@@ -125,6 +125,9 @@ object LazyList2 extends App:
     a => println(a)
   }
 
+  fibs2.take(11).forEach{
+    a => println(a)
+  }
 
 
 
