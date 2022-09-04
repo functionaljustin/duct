@@ -15,6 +15,15 @@ object LazyList2 extends App:
         f(head)
         tail.forEach(f)
     }
+
+    def take(n: Int): OurLazyList[A] = {
+      if n == 0 || isEmpty then
+        OurLazyList.empty
+      else
+        OurLazyList.cons(head, tail.take(n - 1))
+    }
+
+
   }
 
   object OurLazyList:
@@ -40,6 +49,8 @@ object LazyList2 extends App:
 
       def isEmpty = false
     }
+
+    def repeat[A](a: A): OurLazyList[A] = a #:: repeat(a)
 
   class Deferrer[A](tl: => OurLazyList[A]) {
     def #::(hd: A): OurLazyList[A] =
@@ -73,3 +84,12 @@ object LazyList2 extends App:
   list2.forEach { a =>
     println(a)
   }
+
+  // take is lazy
+  val ones = OurLazyList.repeat(1)
+  ones.take(5).forEach{ a =>
+    println(a)
+  }
+
+
+
