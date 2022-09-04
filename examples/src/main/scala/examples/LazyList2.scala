@@ -1,5 +1,3 @@
-// Reimplement OurLazyList from scratch and better
-// This is a simplified version of Stream from Scala library 2.7
 package examples
 
 object LazyList2 extends App:
@@ -59,6 +57,13 @@ object LazyList2 extends App:
       }
 
       def isEmpty = false
+    }
+
+    def apply[A](as: A*): OurLazyList[A] = {
+      if as.isEmpty then
+        OurLazyList.empty
+      else
+        cons(as.head, apply(as.tail : _*))
     }
 
     def repeat[A](a: A): OurLazyList[A] = a #:: repeat(a)
@@ -138,4 +143,57 @@ object LazyList2 extends App:
 
   println("ok lets eval next")
   evalList.tail.head
+
+  // matrix stuff
+
+  // Zip two lazy lists with a map function that combines them to some new type
+  def zipWith[A, B, C](as: OurLazyList[A], bs: OurLazyList[B])(
+      f: (A, B) => C): OurLazyList[C] = {
+    as.zip(bs).map { case (a, b) => f(a, b) }
+  }
+
+
+  def incN(n: Int, inc: Int): OurLazyList[Int] =
+    OurLazyList.cons(n, incN(n + inc, inc))
+
+  // test zipWith and repeat (this is okay)
+  val threeFactors = incN(3,3)
+  val zw1 = zipWith(ones,threeFactors){case (a,b) => a * b}
+  zw1.take(10).forEach {
+    println(_)
+  }
+
+
+  def transpose[A](matrix: OurLazyList[OurLazyList[A]]): OurLazyList[OurLazyList[A]] = {
+    if matrix.isEmpty then
+      OurLazyList.repeat(OurLazyList.empty)
+    else
+      zipWith(matrix.head, transpose(matrix.tail)) {
+        case (a, as) =>
+          OurLazyList.cons(a,as)
+      }
+  }
+
+  val matrix = OurLazyList(
+      OurLazyList(11, 12, 13, 14, 15),
+      OurLazyList(21, 22, 23, 24, 25),
+      OurLazyList(31, 32, 33, 34, 35),
+    )
+
+  matrix.forEach { l =>
+      l.forEach { l2 =>
+        print(f"$l2 ")
+      }
+      println()
+    }
+
+  val transposed = transpose(matrix)
+
+  transposed.forEach { l =>
+      l.forEach { l2 =>
+        print(f"$l2 ")
+      }
+      println()
+    }
+
 
