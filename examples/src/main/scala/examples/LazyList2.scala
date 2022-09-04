@@ -44,8 +44,8 @@ object LazyList2 extends App:
       def isEmpty = true
     }
 
-    def cons[A](hd: A, tl: => OurLazyList[A]) = new OurLazyList[A] {
-      def head = hd
+    def cons[A](hd: => A, tl: => OurLazyList[A]) = new OurLazyList[A] {
+      lazy val head = hd
 
       private var tailEvaluated = false
       private var tailValue: OurLazyList[A] = _
@@ -129,7 +129,13 @@ object LazyList2 extends App:
     a => println(a)
   }
 
+  // test lazy head
+  def evalMe(n: Int): Int = {println(s"evaluating $n"); n}
 
+  val evalList = evalMe(1) #:: evalMe(2) #:: OurLazyList.empty
+  println("ok lets eval first")
+  evalList.head
 
-
+  println("ok lets eval next")
+  evalList.tail.head
 
