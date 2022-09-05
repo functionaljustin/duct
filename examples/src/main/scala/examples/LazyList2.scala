@@ -70,11 +70,20 @@ object LazyList2 extends App:
 
     def repeat[A](a: A): OurLazyList[A] = a #:: repeat(a)
 
-  // Note: right associative extension methods need to swap the parameters
-  // see https://docs.scala-lang.org/scala3/reference/contextual/right-associative-extension-methods.html
+    // Note: right associative extension methods need to swap the parameters
+    // see https://docs.scala-lang.org/scala3/reference/contextual/right-associative-extension-methods.html
     extension [A](hd: A)
       def #::(tl: => OurLazyList[A]): OurLazyList[A] =
         OurLazyList.cons(hd, tl)
+
+  // Note: without extension methods this would have been written:
+  //  class Deferrer[A](tl: => OurLazyList[A]) {
+  //    def #::(hd: A): OurLazyList[A] =
+  //      OurLazyList.cons(hd, tl)
+  //  }
+  //
+  //  implicit def toDeferrer[A](l: => OurLazyList[A]): Deferrer[A] =
+  //    new Deferrer[A](l)
 
   object #:: {
     def unapply[A](s: OurLazyList[A]): Option[(A, OurLazyList[A])] =
