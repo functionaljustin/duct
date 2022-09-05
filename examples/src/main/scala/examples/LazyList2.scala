@@ -10,7 +10,8 @@ object LazyList2 extends App:
 
     def isEmpty: Boolean
 
-    def forEach(f: A => Unit): Unit = {
+    @tailrec
+    final def forEach(f: A => Unit): Unit = {
       if !isEmpty then
         f(head)
         tail.forEach(f)
@@ -32,10 +33,8 @@ object LazyList2 extends App:
 
     @tailrec
     final def foldLeft[B](z: B)(f: (B, A) => B): B = {
-      if isEmpty then
-        z
-      else
-        tail.foldLeft(f(z,head))(f)
+      if isEmpty then z
+      else tail.foldLeft(f(z, head))(f)
     }
 
   }
@@ -78,6 +77,13 @@ object LazyList2 extends App:
 
   implicit def toDeferrer[A](l: => OurLazyList[A]): Deferrer[A] =
     new Deferrer[A](l)
+
+  object #:: {
+    def unapply[A](s: OurLazyList[A]): Option[(A, OurLazyList[A])] =
+      if (!s.isEmpty) Some((s.head, s.tail)) else None
+  }
+
+  // Example code
 
   def tailWithSideEffect: OurLazyList[Int] = {
     println("getting empty OurLazyList")
@@ -223,4 +229,25 @@ object LazyList2 extends App:
   // 7 seconds to sum 10m bigint
 
   println(incN(1,1).take(10000000).foldLeft(BigInt(0)){case (acc,a) => acc + a})
+
+  // // forEach works with large data sets too but is much slower (about 2 minutes)
+  // var sum: BigInt = 0
+  // incN(1,1).take(10000000).forEach { a =>
+  //   sum += a
+  // }
+  // println(s"sum $sum")
+
+  // unapply works (see definition above), for example 
+  def mapunapply[A, B](ll: OurLazyList[A], f: A => B): OurLazyList[B] = {
+    ll match {
+      case hd #:: tl =>
+        OurLazyList.cons(f(hd), mapunapply(tl, f))
+      case OurLazyList.empty =>
+        OurLazyList.empty
+    }
+  }
+
+  // mapunapply(ones.take(10), {_ + 1}).forEach { a => 
+  //   println(s"a $a")
+  // }
 
