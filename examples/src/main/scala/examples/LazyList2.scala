@@ -48,17 +48,7 @@ object LazyList2 extends App:
 
     def cons[A](hd: => A, tl: => OurLazyList[A]) = new OurLazyList[A] {
       lazy val head = hd
-
-      private var tailEvaluated = false
-      private var tailValue: OurLazyList[A] = _
-
-      def tail: OurLazyList[A] = {
-        if (!tailEvaluated) {
-          tailValue = tl
-          tailEvaluated = true
-        }
-        tailValue
-      }
+      lazy val tail = tl
 
       def isEmpty = false
     }
