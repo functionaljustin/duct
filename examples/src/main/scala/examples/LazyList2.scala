@@ -1,5 +1,7 @@
 package examples
 
+import scala.annotation.tailrec
+
 object LazyList2 extends App:
 
   trait OurLazyList[+A] {
@@ -15,24 +17,27 @@ object LazyList2 extends App:
     }
 
     def take(n: Int): OurLazyList[A] = {
-      if n == 0 || isEmpty then
-        OurLazyList.empty
-      else
-        OurLazyList.cons(head, tail.take(n - 1))
+      if n == 0 || isEmpty then OurLazyList.empty
+      else OurLazyList.cons(head, tail.take(n - 1))
     }
 
-    def zip[B](other: OurLazyList[B]): OurLazyList[(A,B)] = {
-     if isEmpty || other.isEmpty then
-      OurLazyList.empty
-    else
-      OurLazyList.cons((head,other.head), tail.zip(other.tail))
+    def zip[B](other: OurLazyList[B]): OurLazyList[(A, B)] = {
+      if isEmpty || other.isEmpty then OurLazyList.empty
+      else OurLazyList.cons((head, other.head), tail.zip(other.tail))
     }
 
-    def map[B](f: A => B): OurLazyList[B] = 
+    def map[B](f: A => B): OurLazyList[B] =
+      if isEmpty then OurLazyList.empty
+      else OurLazyList.cons(f(head), tail.map(f))
+
+    @tailrec
+    final def foldLeft[B](z: B)(f: (B, A) => B): B = {
       if isEmpty then
-        OurLazyList.empty
+        z
       else
-        OurLazyList.cons(f(head), tail.map(f))
+        tail.foldLeft(f(z,head))(f)
+    }
+
   }
 
   object OurLazyList:
@@ -60,10 +65,8 @@ object LazyList2 extends App:
     }
 
     def apply[A](as: A*): OurLazyList[A] = {
-      if as.isEmpty then
-        OurLazyList.empty
-      else
-        cons(as.head, apply(as.tail : _*))
+      if as.isEmpty then OurLazyList.empty
+      else cons(as.head, apply(as.tail: _*))
     }
 
     def repeat[A](a: A): OurLazyList[A] = a #:: repeat(a)
@@ -103,20 +106,20 @@ object LazyList2 extends App:
 
   // take is lazy
   val ones = OurLazyList.repeat(1)
-  ones.take(5).forEach{ a =>
+  ones.take(5).forEach { a =>
     println(a)
   }
 
   // zip
   val twos = OurLazyList.repeat(2)
-  ones.zip(twos).take(5).forEach{ a =>
+  ones.zip(twos).take(5).forEach { a =>
     println(a)
   }
 
   // map
   val threes = OurLazyList.repeat(3)
-  val mapped = threes.take(3).map(_ + 1).forEach {
-    a => println(a)
+  val mapped = threes.take(3).map(_ + 1).forEach { a =>
+    println(a)
   }
 
   // fibs
@@ -126,16 +129,16 @@ object LazyList2 extends App:
         println(s"Adding $a and $b")
         a + b
       }
-  fibs2.take(10).forEach{
-    a => println(a)
+  fibs2.take(10).forEach { a =>
+    println(a)
   }
 
-  fibs2.take(11).forEach{
-    a => println(a)
+  fibs2.take(11).forEach { a =>
+    println(a)
   }
 
   // test lazy head
-  def evalMe(n: Int): Int = {println(s"evaluating $n"); n}
+  def evalMe(n: Int): Int = { println(s"evaluating $n"); n }
 
   val evalList = evalMe(1) #:: evalMe(2) #:: OurLazyList.empty
   println("ok lets eval first")
@@ -148,52 +151,76 @@ object LazyList2 extends App:
 
   // Zip two lazy lists with a map function that combines them to some new type
   def zipWith[A, B, C](as: OurLazyList[A], bs: OurLazyList[B])(
-      f: (A, B) => C): OurLazyList[C] = {
+      f: (A, B) => C
+  ): OurLazyList[C] = {
     as.zip(bs).map { case (a, b) => f(a, b) }
   }
-
 
   def incN(n: Int, inc: Int): OurLazyList[Int] =
     OurLazyList.cons(n, incN(n + inc, inc))
 
   // test zipWith and repeat (this is okay)
-  val threeFactors = incN(3,3)
-  val zw1 = zipWith(ones,threeFactors){case (a,b) => a * b}
+  val threeFactors = incN(3, 3)
+  val zw1 = zipWith(ones, threeFactors) { case (a, b) => a * b }
   zw1.take(10).forEach {
     println(_)
   }
 
-
-  def transpose[A](matrix: OurLazyList[OurLazyList[A]]): OurLazyList[OurLazyList[A]] = {
-    if matrix.isEmpty then
-      OurLazyList.repeat(OurLazyList.empty)
+  def transpose[A](
+      matrix: OurLazyList[OurLazyList[A]]
+  ): OurLazyList[OurLazyList[A]] = {
+    if matrix.isEmpty then OurLazyList.repeat(OurLazyList.empty)
     else
-      zipWith(matrix.head, transpose(matrix.tail)) {
-        case (a, as) =>
-          OurLazyList.cons(a,as)
+      zipWith(matrix.head, transpose(matrix.tail)) { case (a, as) =>
+        OurLazyList.cons(a, as)
       }
   }
 
   val matrix = OurLazyList(
-      OurLazyList(11, 12, 13, 14, 15),
-      OurLazyList(21, 22, 23, 24, 25),
-      OurLazyList(31, 32, 33, 34, 35),
-    )
+    OurLazyList(11, 12, 13, 14, 15),
+    OurLazyList(21, 22, 23, 24, 25),
+    OurLazyList(31, 32, 33, 34, 35)
+  )
 
   matrix.forEach { l =>
-      l.forEach { l2 =>
-        print(f"$l2 ")
-      }
-      println()
+    l.forEach { l2 =>
+      print(f"$l2 ")
     }
+    println()
+  }
 
   val transposed = transpose(matrix)
 
   transposed.forEach { l =>
-      l.forEach { l2 =>
-        print(f"$l2 ")
-      }
-      println()
+    l.forEach { l2 =>
+      print(f"$l2 ")
     }
+    println()
+  }
 
+  // the fold debacle
+
+  // fold left and fold right, what is the difference and what is the stack safety?
+
+  val l1 = List("a", "b", "c")
+
+  println(l1.foldLeft("d") { (acc, a) =>
+    {
+      println(s"acc $acc a $a")
+      acc + a
+    }
+  }) // "dabc"
+
+  println(l1.foldRight("d") { (a, acc) =>
+    {
+      println(s"acc $acc a $a")
+      acc + a
+    }
+  }) // "dcba"
+
+  // with SBT_OPTS="-XX:+UseG1GC -Xmx4G" sbt
+  // this does not stack overflow or OOM. nice.
+  // 7 seconds to sum 10m bigint
+
+  println(incN(1,1).take(10000000).foldLeft(BigInt(0)){case (acc,a) => acc + a})
 
