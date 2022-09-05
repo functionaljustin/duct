@@ -70,13 +70,11 @@ object LazyList2 extends App:
 
     def repeat[A](a: A): OurLazyList[A] = a #:: repeat(a)
 
-  class Deferrer[A](tl: => OurLazyList[A]) {
-    def #::(hd: A): OurLazyList[A] =
-      OurLazyList.cons(hd, tl)
-  }
-
-  implicit def toDeferrer[A](l: => OurLazyList[A]): Deferrer[A] =
-    new Deferrer[A](l)
+  // Note: right associative extension methods need to swap the parameters
+  // see https://docs.scala-lang.org/scala3/reference/contextual/right-associative-extension-methods.html
+    extension [A](hd: A)
+      def #::(tl: => OurLazyList[A]): OurLazyList[A] =
+        OurLazyList.cons(hd, tl)
 
   object #:: {
     def unapply[A](s: OurLazyList[A]): Option[(A, OurLazyList[A])] =
@@ -228,7 +226,9 @@ object LazyList2 extends App:
   // this does not stack overflow or OOM. nice.
   // 7 seconds to sum 10m bigint
 
-  println(incN(1,1).take(10000000).foldLeft(BigInt(0)){case (acc,a) => acc + a})
+  println(
+    incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
+  )
 
   // // forEach works with large data sets too but is much slower (about 2 minutes)
   // var sum: BigInt = 0
@@ -237,7 +237,7 @@ object LazyList2 extends App:
   // }
   // println(s"sum $sum")
 
-  // unapply works (see definition above), for example 
+  // unapply works (see definition above), for example
   def mapunapply[A, B](ll: OurLazyList[A], f: A => B): OurLazyList[B] = {
     ll match {
       case hd #:: tl =>
@@ -247,7 +247,6 @@ object LazyList2 extends App:
     }
   }
 
-  // mapunapply(ones.take(10), {_ + 1}).forEach { a => 
+  // mapunapply(ones.take(10), {_ + 1}).forEach { a =>
   //   println(s"a $a")
   // }
-
