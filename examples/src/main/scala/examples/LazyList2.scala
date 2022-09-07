@@ -31,10 +31,26 @@ object LazyList2 extends App:
       if isEmpty then OurLazyList.empty
       else OurLazyList.cons(f(head), tail.map(f))
 
+    def dropWhile(f: A => Boolean): OurLazyList[A] =
+      if isEmpty then OurLazyList.empty
+      else if f(head) then tail.dropWhile(f)
+      else this
+
+    def filter(f: A => Boolean): OurLazyList[A] =
+      val dropped = this.dropWhile(a => !f(a))
+      if dropped.isEmpty then OurLazyList.empty
+      else OurLazyList.cons(dropped.head, dropped.tail.filter(f))
+
     @tailrec
     final def foldLeft[B](z: B)(f: (B, A) => B): B = {
       if isEmpty then z
       else tail.foldLeft(f(z, head))(f)
+    }
+
+    def foldRight[B](z: => B)(f: (A, => B) => B): B = {
+       if isEmpty then z
+       else
+         f(head, tail.foldRight(z)(f))
     }
 
   }
@@ -225,11 +241,11 @@ object LazyList2 extends App:
   // this does not stack overflow or OOM. nice.
   // 7 seconds to sum 10m bigint
 
-  println(
-    incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
-  )
+  // println(
+  //   incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
+  // )
 
-  // // forEach works with large data sets too but is much slower (about 2 minutes)
+  // forEach works with large data sets too but is much slower (about 2 minutes)
   // var sum: BigInt = 0
   // incN(1,1).take(10000000).forEach { a =>
   //   sum += a
@@ -249,3 +265,41 @@ object LazyList2 extends App:
   // mapunapply(ones.take(10), {_ + 1}).forEach { a =>
   //   println(s"a $a")
   // }
+
+  // dropWhile
+  incN(1, 1).dropWhile(_ <= 10).take(5).forEach(println(_))
+
+  // filter
+  incN(1, 1).filter(_ % 2 == 0).take(10).forEach(println(_))
+
+  // foldRight shows early exit of iteration
+  println(incN(1,1).take(10).foldRight(0){
+    (a,b) => {
+        println(s"a $a")
+        if a < 5 then
+          a + b
+        else
+          b
+    }
+  })
+
+  def hasTuna(ll: OurLazyList[String]): Boolean = {
+    ll.foldRight(false){
+      (next, z) => 
+        println(next)
+        if next == "tuna" then
+          true
+        else
+          z
+    }
+  }
+
+  hasTuna(OurLazyList("salmon", "shark", "moray"))
+  hasTuna(OurLazyList("salmon", "shark", "tuna", "moray"))
+
+
+
+
+
+
+
