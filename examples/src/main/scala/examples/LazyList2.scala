@@ -1,6 +1,7 @@
 package examples
 
 import scala.annotation.tailrec
+import org.justinhj.duct.datatypes.NonEmptyList
 
 object LazyList2 extends App:
 
@@ -9,6 +10,11 @@ object LazyList2 extends App:
     def tail: OurLazyList[A]
 
     def isEmpty: Boolean
+
+    def headOption = if !isEmpty then     
+        Some(head) 
+      else 
+        None
 
     @tailrec
     final def forEach(f: A => Unit): Unit = {
@@ -31,12 +37,44 @@ object LazyList2 extends App:
       if isEmpty then OurLazyList.empty
       else OurLazyList.cons(f(head), tail.map(f))
 
+    def dropWhile(f: A => Boolean): OurLazyList[A] =
+      if isEmpty then OurLazyList.empty
+      else if f(head) then tail.dropWhile(f)
+      else this
+
+    def filter(f: A => Boolean): OurLazyList[A] =
+      val dropped = this.dropWhile(a => !f(a))
+      if dropped.isEmpty then OurLazyList.empty
+      else OurLazyList.cons(dropped.head, dropped.tail.filter(f))
+
     @tailrec
     final def foldLeft[B](z: B)(f: (B, A) => B): B = {
       if isEmpty then z
       else tail.foldLeft(f(z, head))(f)
     }
 
+    def foldRight[B](z: => B)(f: (A, => B) => B): B = {
+       if isEmpty then z
+       else
+         f(head, tail.foldRight(z)(f))
+    }
+
+    // Another way to do this is this.filter(f).headOption
+    def first(f: A => Boolean) : Option[A] = {
+      if isEmpty then None
+      else foldRight(None: Option[A]) {
+        (a, b) =>
+          println(s"observe $a")
+          if f(a) then
+            Some(a)
+          else
+            b
+      }
+    }
+
+    def partition(f: A => Boolean): (OurLazyList[A],OurLazyList[A]) = {
+      (filter(f), filter(a => !f(a)))
+    }
   }
 
   object OurLazyList:
@@ -60,9 +98,11 @@ object LazyList2 extends App:
 
     def repeat[A](a: A): OurLazyList[A] = a #:: repeat(a)
 
+    def from(n: Int) : OurLazyList[Int] = n #:: from(n+1)
+
     // Note: right associative extension methods need to swap the parameters
     // see https://docs.scala-lang.org/scala3/reference/contextual/right-associative-extension-methods.html
-    extension [A](hd: A)
+    extension [A](hd: => A)
       def #::(tl: => OurLazyList[A]): OurLazyList[A] =
         OurLazyList.cons(hd, tl)
 
@@ -122,21 +162,6 @@ object LazyList2 extends App:
   // map
   val threes = OurLazyList.repeat(3)
   val mapped = threes.take(3).map(_ + 1).forEach { a =>
-    println(a)
-  }
-
-  // fibs
-  val fibs2: OurLazyList[BigInt] =
-    BigInt(0) #:: BigInt(1) #::
-      fibs2.zip(fibs2.tail).map { (a, b) =>
-        println(s"Adding $a and $b")
-        a + b
-      }
-  fibs2.take(10).forEach { a =>
-    println(a)
-  }
-
-  fibs2.take(11).forEach { a =>
     println(a)
   }
 
@@ -225,11 +250,11 @@ object LazyList2 extends App:
   // this does not stack overflow or OOM. nice.
   // 7 seconds to sum 10m bigint
 
-  println(
-    incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
-  )
+  // println(
+  //   incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
+  // )
 
-  // // forEach works with large data sets too but is much slower (about 2 minutes)
+  // forEach works with large data sets too but is much slower (about 2 minutes)
   // var sum: BigInt = 0
   // incN(1,1).take(10000000).forEach { a =>
   //   sum += a
@@ -249,3 +274,99 @@ object LazyList2 extends App:
   // mapunapply(ones.take(10), {_ + 1}).forEach { a =>
   //   println(s"a $a")
   // }
+
+  // dropWhile
+  incN(1, 1).dropWhile(_ <= 10).take(5).forEach(println(_))
+
+  // filter
+  incN(1, 1).filter(_ % 2 == 0).take(10).forEach(println(_))
+
+  // foldRight shows early exit of iteration
+  println(incN(1,1).take(10).foldRight(0){
+    (a,b) => {
+        println(s"a $a")
+        if a < 5 then
+          a + b
+        else
+          b
+    }
+  })
+
+  def hasTuna(ll: OurLazyList[String]): Boolean = {
+    ll.foldRight(false){
+      (next, z) => 
+        println(next)
+        if next == "tuna" then
+          true
+        else
+          z
+    }
+  }
+
+  def hasTunaStdLib(ll: LazyList[String]): Boolean = {
+    ll.foldRight(false){
+      (next, z) => 
+        println(next)
+        if next == "tuna" then
+          true
+        else
+          z
+    }
+  }
+
+  hasTuna(OurLazyList("salmon", "shark", "moray"))
+
+  hasTunaStdLib(LazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel"))
+
+  // fibs
+  val fibs: OurLazyList[BigInt] =
+    BigInt(0) #:: BigInt(1) #::
+      fibs.zip(fibs.tail).map { (a, b) =>
+        println(s"Adding $a and $b")
+        a + b
+      }
+
+  fibs.take(10).forEach { a =>
+    println(a)
+  }
+
+  fibs.take(11).forEach { a =>
+    println(a)
+  }
+
+  // Finding things lazily
+
+  println(OurLazyList("salmon", "shark", "moray").first(_ == "tuna"))
+  println(OurLazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel").first(_ == "tuna"))
+
+  // Can do this with OurLazyList but not Scala lazy list
+  // https://stackoverflow.com/questions/7830471/foldright-on-infinite-lazy-structure
+
+  println("take 5 from infinite foldRight")
+  OurLazyList.from(1).foldRight(OurLazyList.empty: OurLazyList[Int])( (i, s) => i #:: s).take(5).forEach(println(_))
+
+  // LazyList.from(1).foldRight(LazyList.empty: LazyList[Int])( (i, s) => i #:: s).take(5).foreach(println(_))
+  // println("also done") // never happens
+
+  // http://voidmainargs.blogspot.com/2011/08/folding-stream-with-scala.html
+  OurLazyList.repeat(true).foldRight(false){
+    _ || _
+  }
+
+  // Partition (not very interesting)
+  println("partition")
+  val (l,r) = OurLazyList.from(1).partition(_ % 2 == 0)
+  l.take(20).forEach(println(_))
+  r.take(20).forEach(println(_))
+
+  // headOption 
+  println(
+    OurLazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel").
+      filter(_ == "tuna").
+      headOption)
+
+      
+
+
+
+
