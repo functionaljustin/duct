@@ -250,9 +250,9 @@ object LazyList2 extends App:
   // this does not stack overflow or OOM. nice.
   // 7 seconds to sum 10m bigint
 
-  // println(
-  //   incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
-  // )
+  println(
+    incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
+  )
 
   // forEach works with large data sets too but is much slower (about 2 minutes)
   // var sum: BigInt = 0
