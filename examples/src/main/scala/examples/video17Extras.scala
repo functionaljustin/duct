@@ -83,6 +83,8 @@ object Video17Extras extends App:
     println(_)
   }
 
+  // Nice example from Applicative programming with Effects paper, maybe a later video
+
   def transpose[A](
       matrix: LazyList[LazyList[A]]
   ): LazyList[LazyList[A]] = {

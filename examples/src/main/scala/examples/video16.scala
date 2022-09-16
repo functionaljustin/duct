@@ -2,7 +2,10 @@ package examples
 
 import org.justinhj.duct.datatypes.NonEmptyList
 
-object NonEmptyListDemo extends App:
+// NonEmptyList demo
+// https://youtu.be/7A2xuRkCZBg NonEmptyLists more or less?
+
+object Video16 extends App:
 
   // Basic usage
   val list1 = List(1,2,3)

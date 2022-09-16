@@ -11,7 +11,7 @@ sealed trait LazyList[+A] {
         Some(head) 
       else 
         None
-        
+
     def map[B](f: A => B): LazyList[B] = {
         if isEmpty then LazyList.empty
         else LazyList.cons(f(head), tail.map(f))
@@ -38,6 +38,11 @@ sealed trait LazyList[+A] {
         if n == 0 || isEmpty then LazyList.empty
         else LazyList.cons(head, tail.take(n -1))
     } 
+
+    def toList: List[A] = {
+        if isEmpty then List.empty[A]
+        else head +: tail.toList
+    }
 
     @tailrec
     final def forEach(f: A => Unit): Unit = {
