@@ -2,6 +2,8 @@ package org.justinhj.duct.datatypes
 
 import scala.annotation.tailrec
 
+// Code developed in the video https://youtu.be/laB15gG5bjY Ep 17: The Magic of LazyLists
+
 sealed trait LazyList[+A] {
     def head: A
     def tail: LazyList[A]

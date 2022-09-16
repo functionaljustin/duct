@@ -1,6 +1,8 @@
 package org.justinhj.duct
 import org.justinhj.duct.datatypes.{LazyList,#::}
 
+// Testing for code developed in the video https://youtu.be/laB15gG5bjY Ep 17: The Magic of LazyLists
+
 import scala.collection.immutable.{LazyList as StdLazyList}
 
 class LazyListSuite extends munit.FunSuite{
