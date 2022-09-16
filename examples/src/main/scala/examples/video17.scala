@@ -2,7 +2,9 @@ package examples
 
 import scala.annotation.tailrec
 
-object video17 extends App:
+// Code developed in the video https://youtu.be/laB15gG5bjY Ep 17: The Magic of LazyLists
+
+object Video17 extends App:
     
     sealed trait OurLazyList[+A] {
         def head: A
@@ -93,10 +95,3 @@ object video17 extends App:
             else
                 acc :+ a
     })
-
-  
-
-
-
-
-
