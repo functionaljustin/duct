@@ -132,6 +132,14 @@ object LazyList:
     // All the integers forever (until Int.MaxValue anyway)
     def from(n: Int) : LazyList[Int] = n #:: from(n+1)
 
+    def range(begin: Int, end: Int): LazyList[Int] = {
+        def helper(n: Int, end: Int): LazyList[Int] = {
+            if n == end then LazyList.empty
+            else LazyList.cons(n, helper(n + 1, end))
+        }
+        helper(begin,end)
+    }
+
 
 object #:: {
     def unapply[A](s: LazyList[A]): Option[(A, LazyList[A])] =

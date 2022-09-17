@@ -60,6 +60,7 @@ class LazyListSuite extends munit.FunSuite{
       LazyList.from(1).take(size).forall(_ >= 0)
       LazyList.from(1).exists(_ > size) 
       LazyList.from(1).take(size).foldLeft(0)(_ + _)
+      LazyList.range(1,1000)
     } catch {
       StackOverflowError =>
         fail(s"Should not cause stack overflow")
