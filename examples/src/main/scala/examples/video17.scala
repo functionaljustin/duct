@@ -11,6 +11,15 @@ object Video17 extends App:
         def tail: OurLazyList[A]
         def isEmpty: Boolean
 
+        def headOption = if !isEmpty then     
+                Some(head) 
+            else 
+                None
+         def tailOption = if isEmpty then None
+              else 
+                if tail.isEmpty then None
+                else Some(tail)
+
         def map[B](f: A => B): OurLazyList[B] = {
             if isEmpty then OurLazyList.empty
             else OurLazyList.cons(f(head), tail.map(f))
@@ -21,11 +30,23 @@ object Video17 extends App:
             else OurLazyList.cons((head, other.head), tail.zip(other.tail))
         }
 
-        def dropWhile(f: A => Boolean): OurLazyList[A] = {
+        @tailrec
+        final def dropWhile(f: A => Boolean): OurLazyList[A] = {
             if isEmpty then OurLazyList.empty
             else if f(head) then tail.dropWhile(f)
             else this
         }
+
+        @tailrec
+        final def last: A = {
+            if isEmpty then throw new NoSuchElementException("Empty list has no last element")
+            else {
+                if this.tailOption.isEmpty then 
+                    head
+                else
+                    tail.last
+            }
+        }    
 
         def filter(f: A => Boolean): OurLazyList[A] = {
             val dropped = this.dropWhile(a => !f(a))
@@ -33,10 +54,30 @@ object Video17 extends App:
             else OurLazyList.cons(dropped.head, dropped.tail.filter(f))    
         }    
 
+        // Does not preserve laziness, may not terminate 
+        // for infinite lists
+        @tailrec    
+        final def forall(f: A => Boolean): Boolean = {
+            if isEmpty then true
+            else f(head) && tail.forall(f)
+        }
+
         def take(n: Int): OurLazyList[A] = {
             if n == 0 || isEmpty then OurLazyList.empty
             else OurLazyList.cons(head, tail.take(n -1))
         } 
+
+        @tailrec
+        final def drop(n: Int): OurLazyList[A] = {
+            if n == 0 || isEmpty then this
+            else tail.drop(n-1)
+        } 
+
+        def first(f: A => Boolean) = this.filter(f).headOption
+
+        def exists(f: A => Boolean): Boolean = {
+            this.first(f).isDefined
+        }
 
         @tailrec
         final def forEach(f: A => Unit): Unit = {
@@ -56,6 +97,8 @@ object Video17 extends App:
             else
                 f(head, tail.foldRight(z)(f))
         }
+
+       
     }
 
     object OurLazyList:
@@ -75,6 +118,10 @@ object Video17 extends App:
             if as.isEmpty then OurLazyList.empty
             else OurLazyList.cons(as.head, apply(as.tail: _*))
         }    
+
+        def from(n: Int): OurLazyList[Int] = {
+            n #:: from(n + 1)
+        }
 
         extension [A](hd: => A)
             def #::(tl: => OurLazyList[A]): OurLazyList[A] = 

@@ -3,6 +3,8 @@ package org.justinhj.duct.datatypes
 import scala.annotation.tailrec
 
 // Code developed in the video https://youtu.be/laB15gG5bjY Ep 17: The Magic of LazyLists
+// This is a simple as possible implementation of LazyList based roughly on the original 
+// Scala stdlib version from 2003 by Odersky.
 
 sealed trait LazyList[+A] {
     def head: A
@@ -14,6 +16,11 @@ sealed trait LazyList[+A] {
       else 
         None
 
+    def tailOption = if isEmpty then None
+        else 
+            if tail.isEmpty then None
+            else Some(tail)
+
     def map[B](f: A => B): LazyList[B] = {
         if isEmpty then LazyList.empty
         else LazyList.cons(f(head), tail.map(f))
@@ -24,7 +31,8 @@ sealed trait LazyList[+A] {
         else LazyList.cons((head, other.head), tail.zip(other.tail))
     }
 
-    def dropWhile(f: A => Boolean): LazyList[A] = {
+    @tailrec
+    final def dropWhile(f: A => Boolean): LazyList[A] = {
         if isEmpty then LazyList.empty
         else if f(head) then tail.dropWhile(f)
         else this
@@ -36,10 +44,26 @@ sealed trait LazyList[+A] {
         else LazyList.cons(dropped.head, dropped.tail.filter(f))    
     }    
 
-    def take(n: Int): LazyList[A] = {
+    @tailrec
+    final def drop(n: Int): LazyList[A] = {
+        if n == 0 || isEmpty then this
+        else tail.drop(n-1)
+    }
+
+    final def take(n: Int): LazyList[A] = {
         if n == 0 || isEmpty then LazyList.empty
-        else LazyList.cons(head, tail.take(n -1))
+        else LazyList.cons(head, tail.take(n-1))
     } 
+
+    def exists(f: A => Boolean): Boolean = {
+        this.first(f).isDefined
+    }
+
+    @tailrec    
+    final def forall(f: A => Boolean): Boolean = {
+        if isEmpty then true
+        else f(head) && tail.forall(f)
+    }
 
     def toList: List[A] = {
         if isEmpty then List.empty[A]
@@ -69,8 +93,13 @@ sealed trait LazyList[+A] {
       (filter(f), filter(a => !f(a)))
     }
 
-    // Finding things
     def first(f: A => Boolean) = this.filter(f).headOption
+
+    def ++[BB >: A](e: => LazyList[BB]): LazyList[BB] =
+        foldRight(e){
+            case (hd,acc) =>
+                LazyList.cons(hd, acc)
+        }
 }
 
 object LazyList:

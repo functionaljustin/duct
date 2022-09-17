@@ -66,6 +66,17 @@ given listMonad: Monad[List] with
       }
     }
 
+given lazyListMonad: Monad[LazyList] with
+  def pure[A](a: A): LazyList[A] = LazyList(a)
+
+  extension[A,B](x: LazyList[A])
+    def flatMap(f: A => LazyList[B]): LazyList[B] = {
+      x match {
+        case hd #:: tl => f(hd) ++ tl.flatMap(f)
+        case _ => LazyList.empty
+      }
+    }
+
 given writerTMonad[F[_]: Monad,W: Monoid]: Monad[[X] =>> WriterT[F,W,X]] with {
 
   def pure[A](a: A): WriterT[F,W,A] = WriterT(Monad[F].pure((Monoid[W].zero,a)))
