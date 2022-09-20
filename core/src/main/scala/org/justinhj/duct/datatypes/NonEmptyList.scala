@@ -1,5 +1,7 @@
 package org.justinhj.duct.datatypes
 
+import scala.collection.mutable.ListBuffer
+
 // Ep 16: NonEmptyLists more or less
 // https://youtu.be/7A2xuRkCZBg
 
@@ -12,7 +14,33 @@ case class NonEmptyList[A](head:A, tail:A*):
   def append(right: NonEmptyList[A]): NonEmptyList[A] =
     NonEmptyList(head, (tail :+ right.head) ++ right.tail:_*)
 
+  // TODO tests
+  def tailUnsafe: NonEmptyList[A] = NonEmptyList(tail.head, tail.tail: _*)
+
+  // TODO tests
+  def tailOption: Option[NonEmptyList[A]] = {
+    tail match {
+      case _ :: tl =>
+        Some(NonEmptyList(tl.head, tl.tail: _*))
+      case _ => None  
+    }
+  }
+
   def toList: List[A] = (head +: tail).toList
+
+  // TODO tests
+  def forEach(f: A => Unit): Unit =  {
+    f(head)
+    if tail.nonEmpty then
+      tail.foreach(f)
+  }
+
+  def tails: NonEmptyList[NonEmptyList[A]] = {
+    var l = this.toList
+    val tld = l.tails.filterNot(_.isEmpty).toList
+    val nels = tld.map(n => NonEmptyList(n.head, n.tail: _*))
+    NonEmptyList(nels.head, nels.tail: _*)
+  }
 
 object NonEmptyList:
   def fromSeq[A](items: Seq[A]): Option[NonEmptyList[A]] =

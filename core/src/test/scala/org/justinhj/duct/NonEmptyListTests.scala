@@ -30,4 +30,13 @@ class NonEmptyListSuite extends munit.FunSuite {
     val someThingsNel = NonEmptyList(1,2,3,4,5)
     assertEquals(NonEmptyList.fromSeq(someThings),Some(someThingsNel))
   }
+  test("tails of various sized NonEmptyLists") {
+    assertEquals(NonEmptyList(1).tails, NonEmptyList(NonEmptyList(1)))
+    assertEquals(NonEmptyList(1,2).tails, NonEmptyList(
+      NonEmptyList(1,2), NonEmptyList(2)
+      ))
+    assertEquals(NonEmptyList(1,2,3).tails, NonEmptyList(
+      NonEmptyList(1,2,3), NonEmptyList(2,3), NonEmptyList(3)
+      ))
+  }
 }
