@@ -1,3 +1,5 @@
+package org.justinhj.duct.typeclasses.functor
+
 import org.justinhj.duct.typeclasses.functor.{given,*}
 import org.justinhj.duct.datatypes._
 

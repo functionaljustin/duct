@@ -1,3 +1,5 @@
+package org.justinhj.duct.datatypes
+
 import org.justinhj.duct.datatypes.NonEmptyList
 
 class NonEmptyListSuite extends munit.FunSuite {

@@ -1,3 +1,5 @@
+package org.justinhj.duct.typeclasses.monad
+
 import org.justinhj.duct.typeclasses.monad.{given,*}
 import org.justinhj.duct.datatypes._
 

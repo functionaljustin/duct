@@ -1,3 +1,5 @@
+package org.justinhj.duct.typeclasses.semigroup
+
 import org.justinhj.duct.typeclasses.semigroup.{given,*}
 import org.justinhj.duct.datatypes.NonEmptyList
 

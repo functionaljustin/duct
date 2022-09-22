@@ -1,3 +1,5 @@
+package org.justinhj.duct.typeclasses.monoid
+
 import org.justinhj.duct.typeclasses.monoid.{given,*}
 
 class MonoidSuite extends munit.FunSuite {

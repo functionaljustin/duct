@@ -1,3 +1,5 @@
+package org.justinhj.duct.typeclasses.applicative
+
 import org.justinhj.duct.typeclasses.applicative.{given,*}
 
 class ApplicativeSuite extends munit.FunSuite {

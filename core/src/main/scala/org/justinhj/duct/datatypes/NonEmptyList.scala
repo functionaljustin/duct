@@ -42,9 +42,13 @@ case class NonEmptyList[A](head:A, tail:A*):
     NonEmptyList(nels.head, nels.tail: _*)
   }
 
+  def reverse: NonEmptyList[A] = 
+    val list = this.toList.reverse
+    NonEmptyList(list.head, list.tail:_*)
+
 object NonEmptyList:
   def fromSeq[A](items: Seq[A]): Option[NonEmptyList[A]] =
     if items.size > 0 then
       Some(NonEmptyList(items.head, items.tail:_*))
     else
-      None
+      None 
