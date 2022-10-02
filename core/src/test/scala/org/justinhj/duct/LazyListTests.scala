@@ -81,6 +81,33 @@ class LazyListSuite extends munit.FunSuite{
     def reps(n: Int): LazyList[Int] = {
       LazyList.repeat(n).take(n)
     }
-    assertEquals(LazyList(1,2,3).flatMap(n => reps(n)).toList, LazyList(1,2,2,3,3,3).toList)
+    assertEquals(LazyList(1,2,3).flatMap(n => reps(n)).toList, List(1,2,2,3,3,3))
+  }
+  test("unfold empty") {
+    assertEquals(LazyList.unfold(false)(_ => None).toList,List())
+  }
+  test("unfold basic") {
+    def f(s: Int): Option[(Int,Int)] = 
+      if s > 0 then
+        Some(1,s-1)
+      else
+        None
+    assertEquals(LazyList.unfold(7)(f).toList,List(1,1,1,1,1,1,1))
+  }
+  test("unfold tails") {
+    def tails[A](ll: LazyList[A]): LazyList[LazyList[A]] = {
+      LazyList.unfold(Some(ll): Option[LazyList[A]]){ s => 
+          s match {
+            case Some(hd #:: tl) => 
+              Some(hd #:: tl,Some(tl))
+            case Some(LazyList.empty) => Some(LazyList.empty,None)
+            case _ => None
+          }
+      }
+    }
+    val tls = tails(LazyList(1,2,3))
+    val listified = tls.map(_.toList).toList
+    println(listified)
+    assertEquals(listified, List(List(1,2,3),List(2,3),List(3),List()))
   }
 }

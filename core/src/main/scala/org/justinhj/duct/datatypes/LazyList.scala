@@ -140,6 +140,12 @@ object LazyList:
         helper(begin,end)
     }
 
+    def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] =
+      f(state) match
+        case Some((a,ns)) => 
+          a #:: unfold(ns)(f)
+        case None =>
+          LazyList.empty
 
 object #:: {
     def unapply[A](s: LazyList[A]): Option[(A, LazyList[A])] =
