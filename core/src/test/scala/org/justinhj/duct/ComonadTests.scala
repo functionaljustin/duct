@@ -13,4 +13,12 @@ class ComonadTestSuite extends munit.FunSuite {
       NonEmptyList(1,2,3), NonEmptyList(2,3), NonEmptyList(3)
       ))
   }
+  test("compose of coKleisli") {
+    // Whilst there is no implementation of compose in my Comonad it's 
+    // a more enlightening way to explore the Comonad in general, see:
+    //    https://bartoszmilewski.com/2017/01/02/comonads/ 
+    def compose[A,B,C,F[_]](left: F[A] => B, right: F[B] => C): F[A] => C = {
+      ???
+    }
+  }
 }
