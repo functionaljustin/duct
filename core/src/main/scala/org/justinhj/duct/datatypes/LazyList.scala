@@ -26,6 +26,10 @@ sealed trait LazyList[+A] {
         else LazyList.cons(f(head), tail.map(f))
     }
 
+    def tails: LazyList[LazyList[A]] =
+      if isEmpty then LazyList.empty
+      else LazyList.cons(this, tail.tails)
+
     def zip[B](other: LazyList[B]): LazyList[(A,B)] = {
         if isEmpty || other.isEmpty then LazyList.empty
         else LazyList.cons((head, other.head), tail.zip(other.tail))

@@ -86,6 +86,9 @@ class LazyListSuite extends munit.FunSuite{
   test("unfold empty") {
     assertEquals(LazyList.unfold(false)(_ => None).toList,List())
   }
+  test("tails") {
+    assertEquals(LazyList(1,2,3).tails.map(_.head).toList, List(1,2,3))
+  }
   test("unfold basic") {
     def f(s: Int): Option[(Int,Int)] = 
       if s > 0 then
@@ -107,7 +110,6 @@ class LazyListSuite extends munit.FunSuite{
     }
     val tls = tails(LazyList(1,2,3))
     val listified = tls.map(_.toList).toList
-    println(listified)
     assertEquals(listified, List(List(1,2,3),List(2,3),List(3),List()))
   }
 }
