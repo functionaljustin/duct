@@ -30,6 +30,10 @@ sealed trait LazyList[+A] {
       if isEmpty then LazyList.empty
       else LazyList.cons(this, tail.tails)
 
+    def coflatMap[B](f: LazyList[A] => B): LazyList[B] = {
+      this.tails.map(f)
+    }
+
     def zip[B](other: LazyList[B]): LazyList[(A,B)] = {
         if isEmpty || other.isEmpty then LazyList.empty
         else LazyList.cons((head, other.head), tail.zip(other.tail))
