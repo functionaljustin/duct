@@ -27,6 +27,12 @@ class NonEmptyListSuite extends munit.FunSuite {
     val empty = List.empty[Int]
     assertEquals(NonEmptyList.fromSeq(empty),None) 
   }
+  test("NonEmptyList is a Functor") {
+    val someThings = List(1,2,3,4,5)
+    val someThingsNel = NonEmptyList(1,2,3,4,5)
+    assertEquals(someThingsNel.map(identity),someThingsNel)
+    assertEquals(someThingsNel.map(a => (a*10).toString), NonEmptyList("10","20","30","40","50"))
+  }
   test("fromSeq when not empty seq") {
     val someThings = List(1,2,3,4,5)
     val someThingsNel = NonEmptyList(1,2,3,4,5)

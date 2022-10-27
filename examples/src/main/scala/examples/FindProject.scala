@@ -3,10 +3,14 @@ package examples
 import java.io.File
 import org.apache.commons.io.FilenameUtils
 import scala.util.matching.Regex
-import org.justinhj.duct.datatypes.NonEmptyList
+//import org.justinhj.duct.datatypes.NonEmptyList
 import org.justinhj.duct.typeclasses.comonad.nonEmptyListComonad
 import org.justinhj.duct.datatypes.LazyList
 import org.justinhj.duct.typeclasses.functor.given_Functor_NonEmptyList
+
+// Getting cleaner but needs some more work before video
+// Note that uses LazyList with coflatMap which requires some explanation
+// would be much neater if you could make a NonEmptyLazyList
 
 object FindProject extends App:
   // Given a path use coflatmap to get all the parent path names and iterate over them
@@ -20,36 +24,36 @@ object FindProject extends App:
                        FilenameUtils.getPrefix(pathString)
 
     // TODO add intersperse to List as an extension method
-    def restorePathName(path: NonEmptyList[String]): File =
+    def restorePathName(path: List[String]): File =
       val restoredPath = path.toList.reverse.mkString(pathPrefix, File.separator, File.separator)
       new File(restoredPath)
 
-      // TODO needs coflatMap
-    val candidatePaths = fullPath.split(File.separatorChar).toList.reverse
-    val nel = NonEmptyList.fromSeq(candidatePaths).get
-                          
-    val allPaths = nel.coflatMap(identity).map(restorePathName).toList
-
-    println(s"found ${allPaths.length} candidate paths\n$allPaths")
-    val lazyPaths = LazyList(allPaths: _*)
-
-    // TODO this is nice and all
-    lazyPaths.first(path => {
+    // Given a path File search it for the targets and return an Option of the find result
+    def containsRoot(path: File): Option[File] = {
       // TODO list files in path, match with any regex in the set
       // For now ignore difference between directory and file
       println(s"Search path $path")
       val files = path.listFiles().toList
-      files.find{ file => 
-        rootFiles.find {
-          regex =>
-            //println(s"regex $regex match ${file.getName()} ${regex.matches(file.getName())}")
-            val res = regex.matches(file.getName())
-            if res then 
-              println(s"found ${file.getName()}")
-            res
-        }.isDefined
-      }.isDefined
-    })
+      files.find{file => 
+          rootFiles.find {
+            regex =>
+             // println(s"regex $regex match ${file.getName()} ${regex.matches(file.getName())}")
+              val res = regex.matches(file.getName())
+              if res then 
+                println(s"found ${file.getName()}")
+              res
+          }.isDefined
+       }
+    }
+
+    val candidatePaths = fullPath.split(File.separatorChar).toList.reverse
+
+    LazyList(candidatePaths: _*).coflatMap{
+      l => 
+        val path = restorePathName(l.toList)
+        println(s"explore path $path")
+        containsRoot(path)
+    }.first(_.isDefined).flatten   
   }
 
   val cd = new File("/Users/justin.heyes-jones/projects/path-to-comonads/src/main/scala/org/justinhj/Pathtocomonads.scala")

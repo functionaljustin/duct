@@ -28,6 +28,8 @@ case class NonEmptyList[A](head:A, tail:A*):
 
   def toList: List[A] = (head +: tail).toList
 
+  def map[B](f: A => B): NonEmptyList[B] = NonEmptyList(f(head), tail.map(f): _*)
+
   // TODO tests
   def forEach(f: A => Unit): Unit =  {
     f(head)
