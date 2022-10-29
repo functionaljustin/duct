@@ -1,6 +1,6 @@
 package org.justinhj.duct.typeclasses.comonad
 
-import org.justinhj.duct.datatypes.{NonEmptyList,CoReader}
+import org.justinhj.duct.datatypes.{NonEmptyLazyList,NonEmptyList,CoReader}
 import scala.collection.mutable.ListBuffer
 import org.justinhj.duct.typeclasses.functor.given_Functor_NonEmptyList
 import java.nio.charset.CoderResult
@@ -31,3 +31,11 @@ given coReaderComonad[R]: Comonad[[X] =>> CoReader[R,X]] with
     extension [A, B](cr: CoReader[R,A]) 
         override def coflatMap(f: CoReader[R,A] => B): CoReader[R,B] = cr.duplicate.map(f)
         def map(f: A => B): CoReader[R,B] = cr.map(f)
+
+given nonEmptyLazyListComonad: Comonad[NonEmptyLazyList] with
+  
+    def extract[A](nel: NonEmptyLazyList[A]) = nel.head
+
+    extension [A, B](nel: NonEmptyLazyList[A]) 
+        def coflatMap(f: NonEmptyLazyList[A] => B): NonEmptyLazyList[B] = nel.tails.map(f)
+        def map(f: A => B): NonEmptyLazyList[B] = nel.map(f)
