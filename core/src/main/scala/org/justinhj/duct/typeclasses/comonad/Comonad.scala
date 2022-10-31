@@ -26,11 +26,13 @@ given nonEmptyListComonad: Comonad[NonEmptyList] with
         def map(f: A => B): NonEmptyList[B] = nel.map(f)
 
 given coReaderComonad[R]: Comonad[[X] =>> CoReader[R,X]] with
-    def extract[A](cr: CoReader[R,A]) = cr.value
+    def extract[A](cr: CoReader[R,A]) = cr.extract
 
     extension [A, B](cr: CoReader[R,A]) 
-        override def coflatMap(f: CoReader[R,A] => B): CoReader[R,B] = cr.duplicate.map(f)
-        def map(f: A => B): CoReader[R,B] = cr.map(f)
+        override def coflatMap(f: CoReader[R,A] => B): CoReader[R,B] = 
+           cr.duplicate.map(f)
+        def map(f: A => B): CoReader[R,B] = 
+            cr.coflatMap(cra => f(cra.extract))
 
 given nonEmptyLazyListComonad: Comonad[NonEmptyLazyList] with
   
