@@ -1,6 +1,7 @@
 package org.justinhj.duct.datatypes
 
 import scala.collection.mutable.ListBuffer
+import scala.annotation.tailrec
 
 // Ep 16: NonEmptyLists more or less
 // https://youtu.be/7A2xuRkCZBg
@@ -36,6 +37,15 @@ case class NonEmptyList[A](head:A, tail:A*):
     if tail.nonEmpty then
       tail.foreach(f)
   }
+
+  def size: Int = 1 + tails.size
+
+  @tailrec
+  final def foldLeft[B](z: B)(f: (B,A) => B): B =
+    val next = f(z,head)
+    tailOption match
+      case Some(rest) => rest.foldLeft(next)(f)
+      case None => next
 
   def tails: NonEmptyList[NonEmptyList[A]] = {
     var l = this.toList

@@ -25,7 +25,7 @@ object Video17Extras extends App:
   list1.tail // this would eval the tail
 
   println("forEach list1")
-  list1.forEach { a =>
+  LazyList(1,2,3).forEach { a =>
     println(a)
   }
 
@@ -90,9 +90,10 @@ object Video17Extras extends App:
   ): LazyList[LazyList[A]] = {
     if matrix.isEmpty then LazyList.repeat(LazyList.empty)
     else
-      zipWith(matrix.head, transpose(matrix.tail)) { case (a, as) =>
-        LazyList.cons(a, as)
-      }
+      zipWith(matrix.head, transpose(matrix.tail))(_ #:: _)
+      // { case (a, as) =>
+      //   LazyList.cons(a, as)
+      // }
   }
 
   val matrix = LazyList(
@@ -141,9 +142,15 @@ object Video17Extras extends App:
   // this does not stack overflow or OOM. nice.
   // 7 seconds to sum 10m bigint
 
-  println(
-    incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
-  )
+  // println(
+  //   incN(1, 1).take(10000000).foldLeft(BigInt(0)) { case (acc, a) => acc + a }
+  // )
+
+
+  // Stack overflow with foldRight
+  // println(
+  //   incN(1, 1).take(10000000).foldRight(BigInt(0)) { case (acc, a) => a + acc }
+  // )
 
   // forEach works with large data sets too but is much slower (about 2 minutes)
   // var sum: BigInt = 0
@@ -194,7 +201,7 @@ object Video17Extras extends App:
     }
   }
 
-  def hasTunaStdLib(ll: LazyList[String]): Boolean = {
+  def hasTunaStdLib(ll: scala.collection.immutable.LazyList[String]): Boolean = {
     ll.foldRight(false){
       (next, z) => 
         println(next)
@@ -205,9 +212,11 @@ object Video17Extras extends App:
     }
   }
 
-  hasTuna(LazyList("salmon", "shark", "moray"))
+  println("hastuna")
+  hasTuna(LazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel"))
 
-  hasTunaStdLib(LazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel"))
+  println("hastuna stdlib")
+  hasTunaStdLib(scala.collection.immutable.LazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel"))
 
   // fibs
   val fibs: LazyList[BigInt] =
