@@ -9,8 +9,6 @@ import org.justinhj.duct.datatypes.{LazyList,#::}
 
 object Video17Extras extends App:
 
-  // Extended Examples
-
   def tailWithSideEffect: LazyList[Int] = {
     println("getting empty LazyList")
     LazyList.empty
@@ -260,13 +258,31 @@ object Video17Extras extends App:
   r.take(20).forEach(println(_))
 
   // headOption 
+  val fish = LazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel")
+
+  // Make a tuple of fish names and length
+  val nameAndLengths = fish.map { f =>
+    (f, f.length)
+  }
+  // Find the longest fish name
+  val longest = nameAndLengths.foldLeft(("", 0)) {
+    case ((accName, accLength), (name, length)) =>
+      if length > accLength then
+        (name, length)
+      else
+        (accName, accLength)
+  }
+  println(s"The longest fish name is ${longest._1} with length ${longest._2}")
+  
   println(
-    LazyList("salmon", "shark", "tuna", "moray", "goldfish", "eel").
-      filter(_ == "tuna").
+    fish.filter(_ == "tuna").
       headOption)
 
-      
+  // LazyList of primes
+  def sieve(s: LazyList[Int]): LazyList[Int] =
+    s.head #:: sieve(s.tail.filter(_ % s.head != 0))
 
-
+  val primes = sieve(LazyList.from(2)).take(10)
+  primes.forEach(println(_))
 
 
