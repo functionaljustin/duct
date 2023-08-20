@@ -2,6 +2,7 @@ package examples
 
 import scala.language.postfixOps
 import scala.math.BigInt
+import scala.language.implicitConversions
 
 object LazyListDemo extends App:
   // example of lazy evaluation

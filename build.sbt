@@ -10,7 +10,7 @@ lazy val core = project
   .settings(
     commonSettings,
     name := "duct",
-    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0-M5" % Test
+    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0-M8" % Test
   )
 
 lazy val examples = project
@@ -18,5 +18,5 @@ lazy val examples = project
   .settings(
     commonSettings,
     name := "examples",
-    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0-M5" % Test
+    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0-M8" % Test
   )
