@@ -1,7 +1,7 @@
-package org.justinhj.duct
+package org.functionaljustin.duct
 
-import org.justinhj.duct.typeclasses.functor.{given,*}
-import org.justinhj.duct.datatypes._
+import org.functionaljustin.duct.typeclasses.functor.{given,*}
+import org.functionaljustin.duct.datatypes._
 
 class FunctorSuite extends munit.FunSuite {
   test("NonEmptyList map") {

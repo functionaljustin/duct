@@ -6,7 +6,7 @@ package examples
 // such as foldMap. Also covered are opaque types and 
 // nested monoids.
 
-import org.justinhj.duct.typeclasses.monoid.{given, _}
+import org.functionaljustin.duct.typeclasses.monoid.{given, _}
 
 object Video8 extends App:
   // Usage

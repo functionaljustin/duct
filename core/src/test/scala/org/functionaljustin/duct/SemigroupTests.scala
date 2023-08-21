@@ -1,5 +1,5 @@
-import org.justinhj.duct.typeclasses.semigroup.{given,*}
-import org.justinhj.duct.datatypes.NonEmptyList
+import org.functionaljustin.duct.typeclasses.semigroup.{given,*}
+import org.functionaljustin.duct.datatypes.NonEmptyList
 
 class SemigroupSuite extends munit.FunSuite {
   test("associativity of list semigroup") {

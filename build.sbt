@@ -1,8 +1,8 @@
 val scala3Version = "3.3.0"
 
 lazy val commonSettings = Seq(
-    organization := "org.justinhj",
-    version := "0.3.0-SNAPSHOT",
+    organization := "org.functionaljustin",
+    version := "0.4.0-SNAPSHOT",
     scalaVersion := scala3Version
     )
 

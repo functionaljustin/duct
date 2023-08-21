@@ -1,9 +1,9 @@
 package examples
 
-import org.justinhj.duct.typeclasses.monad.{given, _}
-import org.justinhj.duct.typeclasses.numeric.{given, _}
-import org.justinhj.duct.typeclasses.monoid.{given, _}
-import org.justinhj.duct.datatypes.WriterT
+import org.functionaljustin.duct.typeclasses.monad.{given, _}
+import org.functionaljustin.duct.typeclasses.numeric.{given, _}
+import org.functionaljustin.duct.typeclasses.monoid.{given, _}
+import org.functionaljustin.duct.datatypes.WriterT
 
 // Functional Justin https://youtu.be/d4co05kJIhQ
 // Ep 10: Tell me more! Add logging to a pure program with Applicative and WriterT in Scala 3

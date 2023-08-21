@@ -1,6 +1,6 @@
 package examples
 
-import org.justinhj.duct.datatypes.NonEmptyList
+import org.functionaljustin.duct.datatypes.NonEmptyList
 
 // NonEmptyList demo
 // https://youtu.be/7A2xuRkCZBg NonEmptyLists more or less?

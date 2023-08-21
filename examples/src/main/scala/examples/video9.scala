@@ -2,10 +2,10 @@ package examples
 
 // Functional Justin https://youtu.be/KMm71HLoy0w
 // Ep 9: Transformers, Monads in Disguise
-import org.justinhj.duct.typeclasses.monad.{given,_}
-import org.justinhj.duct.typeclasses.monoid.{given,_}
-import org.justinhj.duct.typeclasses.functor.{given,_}
-import org.justinhj.duct.datatypes.WriterT
+import org.functionaljustin.duct.typeclasses.monad.{given,_}
+import org.functionaljustin.duct.typeclasses.monoid.{given,_}
+import org.functionaljustin.duct.typeclasses.functor.{given,_}
+import org.functionaljustin.duct.datatypes.WriterT
 
 object Video9 extends App:
   val e1 : Either[String, Int] = Right(10)

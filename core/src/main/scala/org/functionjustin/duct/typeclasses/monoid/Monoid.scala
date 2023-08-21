@@ -1,6 +1,6 @@
-package org.justinhj.duct.typeclasses.monoid
+package org.functionaljustin.duct.typeclasses.monoid
 
-import org.justinhj.duct.typeclasses.semigroup.Semigroup
+import org.functionaljustin.duct.typeclasses.semigroup.Semigroup
 
 // Functional Justin https://youtu.be/v2TxejGEzg4
 // Ep 8: Compose Yourself with Scala 3's Opaque Types
