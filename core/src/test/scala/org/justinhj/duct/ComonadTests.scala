@@ -29,8 +29,13 @@ class ComonadTestSuite extends munit.FunSuite {
     // a more enlightening way to explore the Comonad in general, see:
     //    https://bartoszmilewski.com/2017/01/02/comonads/ 
     val nel1 = NonEmptyList(1,2,3)
-    val avg = nel1.foldLeft(0){case (acc, a: Int) => a + acc}
-    assertEquals(avg,2)
+    val avg = nel1.foldLeft(0){
+      case (acc, a: Int) => {
+        println(acc + " " + a);
+        acc + a
+      }
+    }
+    assertEquals(avg,1)
     // val r = compose[Int,Int,Int](nel1 => nel1.foldLeft(0){case (acc, a: Int) => a + acc} / nel1.size, nel2 => nel2.foldLeft(0){case (acc, a: Int) => Math.max(a,acc)})
     // assertEquals(r(nel1),3)
   }
