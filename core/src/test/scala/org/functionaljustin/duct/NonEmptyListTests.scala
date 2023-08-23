@@ -1,4 +1,4 @@
-import org.justinhj.duct.datatypes.NonEmptyList
+import org.functionaljustin.duct.datatypes.NonEmptyList
 
 class NonEmptyListSuite extends munit.FunSuite {
   test("create various lengths and types of NonEmptyList") {

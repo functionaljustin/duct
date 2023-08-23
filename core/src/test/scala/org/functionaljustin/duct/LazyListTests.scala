@@ -1,11 +1,11 @@
-package org.justinhj.duct
-import org.justinhj.duct.datatypes.{LazyList,#::}
-import org.justinhj.duct.typeclasses.monad.lazyListMonad
+package org.functionaljustin.duct
+import org.functionaljustin.duct.datatypes.{LazyList,#::}
+import org.functionaljustin.duct.typeclasses.monad.lazyListMonad
 
 // Testing for code developed in the video https://youtu.be/laB15gG5bjY Ep 17: The Magic of LazyLists
 
 import scala.collection.immutable.{LazyList as StdLazyList}
-import org.justinhj.duct.datatypes.LazyList.apply
+import org.functionaljustin.duct.datatypes.LazyList.apply
 
 class LazyListSuite extends munit.FunSuite{
   test("apply can build lists, and toList works") {

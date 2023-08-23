@@ -68,7 +68,7 @@ object Video7 extends App:
 
   // How about compose with flatmap?
   {
-    import org.justinhj.duct.typeclasses.monad.{given,_}
+    import org.functionaljustin.duct.typeclasses.monad.{given,_}
 
     def compose[F[_],A,B,C](lf: A => F[B], rf: B => F[C])(using m: Monad[F]): A => F[C] = 
       a => lf(a).flatMap(rf)

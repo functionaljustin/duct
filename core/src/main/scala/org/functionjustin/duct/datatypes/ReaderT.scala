@@ -1,6 +1,6 @@
-package org.justinhj.duct.datatypes
+package org.functionaljustin.duct.datatypes
 
-import org.justinhj.duct.typeclasses.monad._
+import org.functionaljustin.duct.typeclasses.monad._
 
 case class ReaderT[F[_],R,A](run: R => F[A])
 

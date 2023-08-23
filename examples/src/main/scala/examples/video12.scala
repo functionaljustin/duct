@@ -9,9 +9,9 @@ package examples
 
 object Video12 extends App:
 
-  import org.justinhj.duct.typeclasses.monad.{eitherMonad, _}
-  import org.justinhj.duct.typeclasses.numeric.{_, given}
-  import org.justinhj.duct.datatypes.{ReaderT, given}
+  import org.functionaljustin.duct.typeclasses.monad.{eitherMonad, _}
+  import org.functionaljustin.duct.typeclasses.numeric.{_, given}
+  import org.functionaljustin.duct.datatypes.{ReaderT, given}
 
   import Exp._
   import Video12._

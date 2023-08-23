@@ -1,4 +1,4 @@
-package org.justinhj.duct.datatypes
+package org.functionaljustin.duct.datatypes
 
 // Ep 16: NonEmptyLists more or less
 // https://youtu.be/7A2xuRkCZBg

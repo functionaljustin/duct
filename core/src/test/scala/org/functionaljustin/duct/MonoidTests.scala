@@ -1,4 +1,4 @@
-import org.justinhj.duct.typeclasses.monoid.{given,*}
+import org.functionaljustin.duct.typeclasses.monoid.{given,*}
 
 class MonoidSuite extends munit.FunSuite {
   test("left and right identity of list monoid") {

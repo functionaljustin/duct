@@ -1,8 +1,8 @@
-package org.justinhj.duct.typeclasses.applicative
+package org.functionaljustin.duct.typeclasses.applicative
 
-import org.justinhj.duct.typeclasses.functor.Functor
-import org.justinhj.duct.typeclasses.monoid._
-import org.justinhj.duct.datatypes.WriterT
+import org.functionaljustin.duct.typeclasses.functor.Functor
+import org.functionaljustin.duct.typeclasses.monoid._
+import org.functionaljustin.duct.datatypes.WriterT
 
 // Functional Justin https://youtu.be/3GPXEzO14ZE
 // Ep 6: Functional error handling with applicative in Scala 3

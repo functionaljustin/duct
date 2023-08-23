@@ -5,8 +5,8 @@ package examples
 // Here I covered the functor laws and implementing evaluation
 // with applicative and functor for error handling with the 
 // Either data type.
-import org.justinhj.duct.typeclasses.monad.{given, _}
-import org.justinhj.duct.typeclasses.numeric.{given, _}
+import org.functionaljustin.duct.typeclasses.monad.{given, _}
+import org.functionaljustin.duct.typeclasses.numeric.{given, _}
 
 object Video6 extends App:
   // Identity law for functors. TODO this can be a test
