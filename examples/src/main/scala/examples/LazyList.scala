@@ -2,7 +2,8 @@ package examples
 
 import scala.language.postfixOps
 import scala.math.BigInt
-import org.justinhj.duct.datatypes.{LazyList,#::}
+import org.functionaljustin.duct.datatypes.{LazyList,#::}
+import scala.language.implicitConversions
 
 object LazyListDemo extends App:
   // example of lazy evaluation

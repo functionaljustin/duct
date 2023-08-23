@@ -1,4 +1,4 @@
-package org.justinhj.duct.datatypes
+package org.functionaljustin.duct.datatypes
 
 // Functional Justin https://youtu.be/KMm71HLoy0w
 // Ep 9: Transformers, Monads in Disguise
@@ -7,10 +7,10 @@ package org.justinhj.duct.datatypes
 // what that PartiallyApplied stuff is for in the pure and lift functions
 // below...
 
-import org.justinhj.duct.typeclasses.monad.Monad
-import org.justinhj.duct.typeclasses.functor.Functor
-import org.justinhj.duct.typeclasses.applicative.Applicative
-import org.justinhj.duct.typeclasses.monoid.{given,_}
+import org.functionaljustin.duct.typeclasses.monad.Monad
+import org.functionaljustin.duct.typeclasses.functor.Functor
+import org.functionaljustin.duct.typeclasses.applicative.Applicative
+import org.functionaljustin.duct.typeclasses.monoid.{given,_}
 
 object WriterT:
   def lift[W]: LiftPartiallyApplied[W] = new LiftPartiallyApplied[W]

@@ -1,6 +1,6 @@
-package org.justinhj.duct.typeclasses.semigroup
+package org.functionaljustin.duct.typeclasses.semigroup
 
-import org.justinhj.duct.datatypes.NonEmptyList
+import org.functionaljustin.duct.datatypes.NonEmptyList
 
 // Functional Justin https://youtu.be/v2TxejGEzg4
 // Ep 8: Compose Yourself with Scala 3's Opaque Types

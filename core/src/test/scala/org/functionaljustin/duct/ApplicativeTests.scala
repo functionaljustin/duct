@@ -1,6 +1,5 @@
-package org.justinhj.duct.typeclasses.applicative
-
-import org.justinhj.duct.typeclasses.applicative.{given,*}
+import org.functionaljustin.duct.typeclasses.applicative.{given,*}
+import org.functionaljustinhj.duct.typeclasses.applicative.{given,*}
 
 class ApplicativeSuite extends munit.FunSuite {
   test("map2 Applicative with list same types") {

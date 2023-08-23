@@ -1,7 +1,7 @@
 package examples
 
 import scala.annotation.tailrec
-import org.justinhj.duct.datatypes.{LazyList,#::}
+import org.functionaljustin.duct.datatypes.{LazyList,#::}
 
 // Examples using the Duct LazyList
 // These examples were created when developing the code and examples for episode 17

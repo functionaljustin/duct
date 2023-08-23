@@ -1,4 +1,4 @@
-package org.justinhj.duct.datatypes
+package org.functionaljustin.duct.datatypes
 
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec

@@ -1,6 +1,6 @@
-package org.justinhj.duct.typeclasses.functor
+package org.functionaljustin.duct.typeclasses.functor
 
-import org.justinhj.duct.datatypes._
+import org.functionaljustin.duct.datatypes._
 
 object Functor:
   def apply[F[_]](using f: Functor[F]) = f
