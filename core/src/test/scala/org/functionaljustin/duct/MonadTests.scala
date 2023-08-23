@@ -1,4 +1,4 @@
-package org.justinhj.duct.typeclasses.monad
+package org.functionaljustin.duct.typeclasses.monad
 
 import org.functionaljustin.duct.typeclasses.monad.{given,*}
 import org.functionaljustin.duct.datatypes._

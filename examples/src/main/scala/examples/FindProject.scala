@@ -3,10 +3,10 @@ package examples
 import java.io.File
 import org.apache.commons.io.FilenameUtils
 import scala.util.matching.Regex
-//import org.justinhj.duct.datatypes.NonEmptyList
-import org.justinhj.duct.typeclasses.comonad.nonEmptyListComonad
-import org.justinhj.duct.datatypes.LazyList
-import org.justinhj.duct.typeclasses.functor.given_Functor_NonEmptyList
+//import org.functionaljustin.duct.datatypes.NonEmptyList
+import org.functionaljustin.duct.typeclasses.comonad.nonEmptyListComonad
+import org.functionaljustin.duct.datatypes.LazyList
+import org.functionaljustin.duct.typeclasses.functor.given_Functor_NonEmptyList
 
 // Getting cleaner but needs some more work before video
 // Note that uses LazyList with coflatMap which requires some explanation

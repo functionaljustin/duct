@@ -1,7 +1,7 @@
 package examples
 
-import org.justinhj.duct.datatypes.NonEmptyLazyList
-import org.justinhj.duct.typeclasses.comonad.{given, _}
+import org.functionaljustin.duct.datatypes.NonEmptyLazyList
+import org.functionaljustin.duct.typeclasses.comonad.{given, _}
 
 object CoFlatMapStream extends App:
 

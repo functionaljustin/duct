@@ -1,10 +1,10 @@
-package org.justinhj.duct.typeclasses.comonad
+package org.functionaljustin.duct.typeclasses.comonad
 
-import org.justinhj.duct.datatypes.{NonEmptyLazyList,NonEmptyList,CoReader}
+import org.functionaljustin.duct.datatypes.{NonEmptyLazyList,NonEmptyList,CoReader}
 import scala.collection.mutable.ListBuffer
-import org.justinhj.duct.typeclasses.functor.given_Functor_NonEmptyList
+import org.functionaljustin.duct.typeclasses.functor.given_Functor_NonEmptyList
 import java.nio.charset.CoderResult
-import org.justinhj.duct.typeclasses.functor.Functor
+import org.functionaljustin.duct.typeclasses.functor.Functor
 
 object Comonad:
   def apply[F[_]](using m: Comonad[F]) = m

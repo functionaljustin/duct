@@ -1,7 +1,7 @@
-package org.justinhj.duct
+package org.functionaljustin.duct
 
-import org.justinhj.duct.datatypes.{NonEmptyList,CoReader}
-import org.justinhj.duct.typeclasses.comonad.{given,_}
+import org.functionaljustin.duct.datatypes.{NonEmptyList,CoReader}
+import org.functionaljustin.duct.typeclasses.comonad.{given,_}
 import java.nio.charset.CoderResult
 
 class ComonadTestSuite extends munit.FunSuite {

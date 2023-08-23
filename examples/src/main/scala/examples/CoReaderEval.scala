@@ -1,7 +1,7 @@
 package examples
 
-import org.justinhj.duct.datatypes.CoReader
-import org.justinhj.duct.typeclasses.comonad.{given, _}
+import org.functionaljustin.duct.datatypes.CoReader
+import org.functionaljustin.duct.typeclasses.comonad.{given, _}
 
 object CoReaderEval extends App:
 
