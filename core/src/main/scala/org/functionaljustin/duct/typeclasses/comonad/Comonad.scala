@@ -17,7 +17,6 @@ trait Comonad[F[_]] extends Functor[F]:
 // Instance implementations
 
 given nonEmptyListComonad: Comonad[NonEmptyList] with
-  
     extension [A, B](nel: NonEmptyList[A]) 
         def extract = nel.head
 
