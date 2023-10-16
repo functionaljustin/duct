@@ -1,3 +1,5 @@
+package org.functionaljustin.duct.datatypes
+
 import org.functionaljustin.duct.datatypes.NonEmptyList
 
 class NonEmptyListSuite extends munit.FunSuite {
@@ -25,9 +27,24 @@ class NonEmptyListSuite extends munit.FunSuite {
     val empty = List.empty[Int]
     assertEquals(NonEmptyList.fromSeq(empty),None) 
   }
+  test("NonEmptyList is a Functor") {
+    val someThings = List(1,2,3,4,5)
+    val someThingsNel = NonEmptyList(1,2,3,4,5)
+    assertEquals(someThingsNel.map(identity),someThingsNel)
+    assertEquals(someThingsNel.map(a => (a*10).toString), NonEmptyList("10","20","30","40","50"))
+  }
   test("fromSeq when not empty seq") {
     val someThings = List(1,2,3,4,5)
     val someThingsNel = NonEmptyList(1,2,3,4,5)
     assertEquals(NonEmptyList.fromSeq(someThings),Some(someThingsNel))
+  }
+  test("tails of various sized NonEmptyLists") {
+    assertEquals(NonEmptyList(1).tails, NonEmptyList(NonEmptyList(1)))
+    assertEquals(NonEmptyList(1,2).tails, NonEmptyList(
+      NonEmptyList(1,2), NonEmptyList(2)
+      ))
+    assertEquals(NonEmptyList(1,2,3).tails, NonEmptyList(
+      NonEmptyList(1,2,3), NonEmptyList(2,3), NonEmptyList(3)
+      ))
   }
 }

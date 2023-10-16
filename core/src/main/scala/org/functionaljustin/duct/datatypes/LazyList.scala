@@ -1,6 +1,7 @@
 package org.functionaljustin.duct.datatypes
 
 import scala.annotation.tailrec
+import math.Numeric.Implicits.infixNumericOps
 
 // Code developed in the video https://youtu.be/laB15gG5bjY Ep 17: The Magic of LazyLists
 // This is a simple as possible implementation of LazyList based roughly on the original 
@@ -21,14 +22,17 @@ sealed trait LazyList[+A] {
             if tail.isEmpty then None
             else Some(tail)
 
-    def map[B](f: A => B): LazyList[B] = {
+    def map[B](f: A => B): LazyList[B] =
         if isEmpty then LazyList.empty
         else LazyList.cons(f(head), tail.map(f))
-    }
 
     def tails: LazyList[LazyList[A]] =
       if isEmpty then LazyList.empty
       else LazyList.cons(this, tail.tails)
+
+    def coflatMap[B](f: LazyList[A] => B): LazyList[B] = {
+      this.tails.map(f)
+    }
 
     def zip[B](other: LazyList[B]): LazyList[(A,B)] = {
         if isEmpty || other.isEmpty then LazyList.empty
@@ -99,6 +103,12 @@ sealed trait LazyList[+A] {
 
     def first(f: A => Boolean) = this.filter(f).headOption
 
+    def sum[B >: A](implicit num: Numeric[B]): B =
+        this.foldLeft(Numeric[B].zero) {
+            (acc,n) =>
+                acc + n
+        }
+
     def ++[BB >: A](e: => LazyList[BB]): LazyList[BB] =
         foldRight(e){
             case (hd,acc) =>
@@ -132,6 +142,7 @@ object LazyList:
 
     // Repeat a thing forever; an infinite list generator...
     def repeat[A](a: A): LazyList[A] = a #:: repeat(a)
+    def iterate[A](a: A)(next: A => A): LazyList[A] = a #:: iterate(next(a))(next)
 
     // All the integers forever (until Int.MaxValue anyway)
     def from(n: Int) : LazyList[Int] = n #:: from(n+1)

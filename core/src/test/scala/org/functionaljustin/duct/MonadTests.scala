@@ -1,7 +1,9 @@
+package org.functionaljustin.duct.typeclasses.monad
+
 import org.functionaljustin.duct.typeclasses.monad.{given,*}
 import org.functionaljustin.duct.datatypes._
 
-// TODO this should use MUnit's scalacheck integration for law testing
+// TODO this could use MUnit's scalacheck integration for law testing
 // https://scalameta.org/munit/blog/2020/03/24/scalacheck.html
 
 // left identity

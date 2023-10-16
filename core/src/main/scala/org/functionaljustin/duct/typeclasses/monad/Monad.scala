@@ -18,7 +18,7 @@ trait Monad[F[_]] extends Applicative[F]:
 
  extension[A,B](fa :F[A])
    // The fundamental composition operation
-   def flatMap(f :A=>F[B]):F[B]
+   def flatMap(f: A => F[B]):F[B]
 
    // Monad can also implement `ap` in terms of `map` and `flatMap`
    def ap(fab: F[A => B]): F[B] = {
