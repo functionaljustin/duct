@@ -3,8 +3,6 @@ package examples
 import java.io.File
 import java.nio.file.{Path, Paths}
 import scala.util.matching.Regex
-// Removed FilenameUtils import
-//import org.functionaljustin.duct.datatypes.NonEmptyList
 import org.functionaljustin.duct.typeclasses.comonad.nonEmptyListComonad
 import org.functionaljustin.duct.datatypes.LazyList
 import org.functionaljustin.duct.typeclasses.functor.given_Functor_NonEmptyList
