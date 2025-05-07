@@ -1,4 +1,4 @@
-val scala3Version = "3.3.0"
+val scala3Version = "3.6.4"
 
 lazy val commonSettings = Seq(
     organization := "org.functionaljustin",
@@ -20,7 +20,7 @@ lazy val examples = project
     name := "examples",
     libraryDependencies ++= Seq(
       // apache commons
-      "commons-io" % "commons-io" % "2.11.0",
+      "org.apache.commons" % "commons-io" % "2.19.0",
       "org.scalameta" %% "munit" % "1.0.0-M8" % Test
     )
   )

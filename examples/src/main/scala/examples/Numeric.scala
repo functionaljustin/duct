@@ -41,12 +41,12 @@ given Numeric[String] with
 
   // Subtract string b from a (kinda)
   def sub(a: String, b: String): String = {
-    val newSize = a.size - b.size
+    val newSize = a.length - b.size
     a.substring(0, newSize)
   }
 
   def div(a: String, b: String): String = {
-    val newSize = a.size / b.size
+    val newSize = a.length / b.length
     a.substring(0, newSize)
   }
 
@@ -58,4 +58,4 @@ given Numeric[String] with
     ) yield s
   }
 
-  def isZero(a: String) = a.size == 0
+  def isZero(a: String): Boolean = a.isEmpty

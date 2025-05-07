@@ -108,5 +108,5 @@ given nonEmptyListMonad: Monad[NonEmptyList] with
       val fss: List[B] = fs ++ x.tail.toList.flatMap{a =>
         f(a).toList
       }
-      NonEmptyList(fss.head, fss.tail:_*)
+      NonEmptyList(fss.head, fss.tail*)
     }

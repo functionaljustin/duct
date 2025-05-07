@@ -116,7 +116,7 @@ object Video17 extends App:
 
         def apply[A](as: A*): OurLazyList[A] = {
             if as.isEmpty then OurLazyList.empty
-            else OurLazyList.cons(as.head, apply(as.tail: _*))
+            else OurLazyList.cons(as.head, apply(as.tail*))
         }    
 
         def from(n: Int): OurLazyList[Int] = {

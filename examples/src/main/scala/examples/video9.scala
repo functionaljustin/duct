@@ -20,6 +20,7 @@ object Video9 extends App:
   def doubleOdd(n: Int): StringEither[Int] =
     if n % 2 == 1 then Right(n *2) else Left("Not an odd number")
     
+  @annotation.nowarn("id=205")
   val program1: StringEitherWriter[Int] = for (
     a <- WriterT.pure[StringEither,List[String]](10).tellWith(a => List(s"Initialized with $a"));
     b <- WriterT.lift[List[String]](incrementEven(a)).tellWith(a => List(s"incremented to $a"));

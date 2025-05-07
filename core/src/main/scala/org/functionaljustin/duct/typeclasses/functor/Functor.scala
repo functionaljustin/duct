@@ -28,5 +28,5 @@ given Functor[NonEmptyList] with
   extension[A,B](x: NonEmptyList[A])
     def map(f: A => B): NonEmptyList[B] = {
       val mapped = x.toList.map(f)
-      NonEmptyList(mapped.head, mapped.tail: _*)
+      NonEmptyList(mapped.head, mapped.tail*)
     }

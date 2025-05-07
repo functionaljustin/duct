@@ -1,8 +1,8 @@
 package examples
 
 import java.io.File
-import org.apache.commons.io.FilenameUtils
 import scala.util.matching.Regex
+import org.apache.commons.io.FilenameUtils
 //import org.functionaljustin.duct.datatypes.NonEmptyList
 import org.functionaljustin.duct.typeclasses.comonad.nonEmptyListComonad
 import org.functionaljustin.duct.datatypes.LazyList
@@ -48,7 +48,7 @@ object FindProject extends App:
 
     val candidatePaths = fullPath.split(File.separatorChar).toList.reverse
 
-    LazyList(candidatePaths: _*).coflatMap{
+    LazyList(candidatePaths*).coflatMap{
       l => 
         val path = restorePathName(l.toList)
         println(s"explore path $path")
