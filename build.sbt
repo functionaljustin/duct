@@ -19,8 +19,6 @@ lazy val examples = project
     commonSettings,
     name := "examples",
     libraryDependencies ++= Seq(
-      // apache commons
-      "org.apache.commons" % "commons-io" % "2.19.0",
       "org.scalameta" %% "munit" % "1.0.0-M8" % Test
     )
   )
