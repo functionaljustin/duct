@@ -33,7 +33,7 @@ jobs:
         restore-keys: ${{ runner.os }}-sbt-
     - name: Run tests
       run: |
-        export GITHUB_TOKEN=dummy-token
+        echo TOKEN $GITHUB_TOKEN
         sbt test
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
