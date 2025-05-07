@@ -32,6 +32,8 @@ jobs:
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
         restore-keys: ${{ runner.os }}-sbt-
     - name: Run tests
-      run: sbt test
+      run: |
+        export GITHUB_TOKEN=dummy-token
+        sbt test
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
