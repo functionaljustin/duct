@@ -67,7 +67,7 @@ object FindProject extends App:
     }.first(_.isDefined).flatten   
   }
 
-  val cd = new File("/Users/justin.heyes-jones/projects/path-to-comonads/src/main/scala/org/justinhj/Pathtocomonads.scala")
+  val cd = new File("/Users/justinhj/projects/duct/src/main/scala/examples/FindProject.scala")
   val found = findRoot(cd, Set("build.sbt".r, "Cargo.toml".r))
   found match {
     case Some(f) =>
