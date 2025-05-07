@@ -1,29 +1,37 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Scala CI
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 permissions:
   contents: read
+  pull-requests: write # Required for commenting on PRs if needed
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: 'sbt'
-    - name: Run tests
-      run: sbt test
+      - name: Checkout code
+        uses: actions/checkout@v4 # Updated to latest version
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4 # Updated to latest version
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'sbt' # Caches sbt dependencies
+
+      - name: Run tests
+        run: sbt clean test # Added 'clean' to ensure a fresh build
+
+      - name: Upload test results
+        if: always() # Runs even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/test-reports/
+          retention-days: 7
