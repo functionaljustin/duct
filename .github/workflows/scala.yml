@@ -2,36 +2,33 @@ name: Scala CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
-  pull-requests: write # Required for commenting on PRs if needed
+    branches: [ main ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # Updated to latest version
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4 # Updated to latest version
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'sbt' # Caches sbt dependencies
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      - name: Run tests
-        run: sbt clean test # Added 'clean' to ensure a fresh build
+    - name: Cache SBT
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.sbt
+          ~/.ivy2/cache
+          ~/.coursier/cache
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+        restore-keys: ${{ runner.os }}-sbt-
 
-      - name: Upload test results
-        if: always() # Runs even if tests fail
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: target/test-reports/
-          retention-days: 7
+    - name: Run tests
+      run: sbt test
