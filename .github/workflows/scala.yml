@@ -33,3 +33,5 @@ jobs:
         restore-keys: ${{ runner.os }}-sbt-
     - name: Run tests
       run: sbt test
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
