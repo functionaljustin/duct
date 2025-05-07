@@ -133,7 +133,7 @@ object LazyList:
     // Build a lazy list from a variable argument list
     def apply[A](as: A*): LazyList[A] = {
         if as.isEmpty then LazyList.empty
-        else LazyList.cons(as.head, apply(as.tail: _*))
+        else LazyList.cons(as.head, apply(as.tail*))
     }    
 
     extension [A](hd: => A)

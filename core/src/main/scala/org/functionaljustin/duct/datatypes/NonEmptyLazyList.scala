@@ -51,7 +51,7 @@ object NonEmptyLazyList:
         lazy val tail = tl
 
     def apply[A](a: => A, as: A*): NonEmptyLazyList[A] =
-        NonEmptyLazyList.cons(a, LazyList.apply(as: _*))
+        NonEmptyLazyList.cons(a, LazyList.apply(as*))
 
     def repeat[A](a: A): NonEmptyLazyList[A] = NonEmptyLazyList.cons(a, LazyList.repeat(a))
     def iterate[A](a: A)(next: A => A): NonEmptyLazyList[A] = NonEmptyLazyList.cons(a,LazyList.iterate(next(a))(next))

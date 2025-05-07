@@ -24,10 +24,6 @@ Following in the footsteps of Scalaz and Cats, DUCT brings powerful and principl
 
 At some point I may add proper code documentation but for now the code just links back to the video it was created in.
 
-# Warning
-
-I don't have a lot of free time.
-
 [^1]: Before Scala 3 was known as such it was known as [Dotty](https://dotty.epfl.ch/). 
 
 &#169; 2021-2022 Justin Heyes-Jones and DUCT contributors. All Rights Reserved.

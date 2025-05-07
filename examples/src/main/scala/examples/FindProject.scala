@@ -1,9 +1,8 @@
 package examples
 
 import java.io.File
-import org.apache.commons.io.FilenameUtils
+import java.nio.file.{Path, Paths}
 import scala.util.matching.Regex
-//import org.functionaljustin.duct.datatypes.NonEmptyList
 import org.functionaljustin.duct.typeclasses.comonad.nonEmptyListComonad
 import org.functionaljustin.duct.datatypes.LazyList
 import org.functionaljustin.duct.typeclasses.functor.given_Functor_NonEmptyList
@@ -13,15 +12,28 @@ import org.functionaljustin.duct.typeclasses.functor.given_Functor_NonEmptyList
 // would be much neater if you could make a NonEmptyLazyList
 
 object FindProject extends App:
+  // Path helper functions to replace FilenameUtils
+  object PathUtils:
+    def getPath(path: String): String = 
+      val file = new File(path)
+      val parentPath = file.getParent()
+      if parentPath == null then "" else parentPath + File.separator
+      
+    def getPrefix(path: String): String =
+      if path.startsWith(File.separator) then File.separator
+      else if path.matches("[A-Za-z]:.*") then path.substring(0, 2) // Windows drive prefix
+      else ""
+
   // Given a path use coflatmap to get all the parent path names and iterate over them
   // finding the first folder that has files matching a pattern
   def findRoot(path: File, rootFiles: Set[Regex]): Option[File] = {
-    val pathString = FilenameUtils.getPath(path.getCanonicalPath())
-    val fullPath = FilenameUtils.getPath(pathString)
-    val pathPrefix = if(FilenameUtils.getPrefix(pathString).length() == 0) 
+    val canonicalPath = path.getCanonicalPath()
+    val pathString = PathUtils.getPath(canonicalPath)
+    val fullPath = PathUtils.getPath(pathString)
+    val pathPrefix = if(PathUtils.getPrefix(pathString).length() == 0) 
                        File.separator
                      else 
-                       FilenameUtils.getPrefix(pathString)
+                       PathUtils.getPrefix(pathString)
 
     // TODO add intersperse to List as an extension method
     def restorePathName(path: List[String]): File =
@@ -33,11 +45,10 @@ object FindProject extends App:
       // TODO list files in path, match with any regex in the set
       // For now ignore difference between directory and file
       println(s"Search path $path")
-      val files = path.listFiles().toList
-      files.find{file => 
-          rootFiles.find {
-            regex =>
-             // println(s"regex $regex match ${file.getName()} ${regex.matches(file.getName())}")
+      val files = path.listFiles()
+      if files == null then None
+      else files.toList.find { file => 
+          rootFiles.find { regex =>
               val res = regex.matches(file.getName())
               if res then 
                 println(s"found ${file.getName()}")
@@ -48,7 +59,7 @@ object FindProject extends App:
 
     val candidatePaths = fullPath.split(File.separatorChar).toList.reverse
 
-    LazyList(candidatePaths: _*).coflatMap{
+    LazyList(candidatePaths*).coflatMap{
       l => 
         val path = restorePathName(l.toList)
         println(s"explore path $path")
@@ -56,7 +67,7 @@ object FindProject extends App:
     }.first(_.isDefined).flatten   
   }
 
-  val cd = new File("/Users/justin.heyes-jones/projects/path-to-comonads/src/main/scala/org/justinhj/Pathtocomonads.scala")
+  val cd = new File("/Users/justinhj/projects/duct/src/main/scala/examples/FindProject.scala")
   val found = findRoot(cd, Set("build.sbt".r, "Cargo.toml".r))
   found match {
     case Some(f) =>

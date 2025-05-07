@@ -13,23 +13,23 @@ case class NonEmptyList[A](head:A, tail:A*):
   // Append a NonEmptyList of type B which must be either the same
   // type as A or a super-type
   def append(right: NonEmptyList[A]): NonEmptyList[A] =
-    NonEmptyList(head, (tail :+ right.head) ++ right.tail:_*)
+    NonEmptyList(head, (tail :+ right.head) ++ right.tail*)
 
   // TODO tests
-  def tailUnsafe: NonEmptyList[A] = NonEmptyList(tail.head, tail.tail: _*)
+  def tailUnsafe: NonEmptyList[A] = NonEmptyList(tail.head, tail.tail*)
 
   // TODO tests
   def tailOption: Option[NonEmptyList[A]] = {
     tail match {
       case _ :: tl =>
-        Some(NonEmptyList(tl.head, tl.tail: _*))
+        Some(NonEmptyList(tl.head, tl.tail*))
       case _ => None  
     }
   }
 
   def toList: List[A] = (head +: tail).toList
 
-  def map[B](f: A => B): NonEmptyList[B] = NonEmptyList(f(head), tail.map(f): _*)
+  def map[B](f: A => B): NonEmptyList[B] = NonEmptyList(f(head), tail.map(f)*)
 
   // TODO tests
   def forEach(f: A => Unit): Unit =  {
@@ -50,17 +50,17 @@ case class NonEmptyList[A](head:A, tail:A*):
   def tails: NonEmptyList[NonEmptyList[A]] = {
     var l = this.toList
     val tld = l.tails.filterNot(_.isEmpty).toList
-    val nels = tld.map(n => NonEmptyList(n.head, n.tail: _*))
-    NonEmptyList(nels.head, nels.tail: _*)
+    val nels = tld.map(n => NonEmptyList(n.head, n.tail*))
+    NonEmptyList(nels.head, nels.tail*)
   }
 
   def reverse: NonEmptyList[A] = 
     val list = this.toList.reverse
-    NonEmptyList(list.head, list.tail:_*)
+    NonEmptyList(list.head, list.tail*)
 
 object NonEmptyList:
   def fromSeq[A](items: Seq[A]): Option[NonEmptyList[A]] =
     if items.size > 0 then
-      Some(NonEmptyList(items.head, items.tail:_*))
+      Some(NonEmptyList(items.head, items.tail*))
     else
       None 
