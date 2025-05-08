@@ -1,22 +1,20 @@
 package org.functionaljustin.duct.datatypes
 
-// Functional Justin https://youtu.be/KMm71HLoy0w
-// Ep 9: Transformers, Monads in Disguise
-// Working with Monad Transformers can be kinda awful. In particular 
-// I ran into many type inference issues creating this code. That's
-// what that PartiallyApplied stuff is for in the pure and lift functions
-// below...
-
 import org.functionaljustin.duct.typeclasses.monad.Monad
 import org.functionaljustin.duct.typeclasses.functor.Functor
 import org.functionaljustin.duct.typeclasses.applicative.Applicative
 import org.functionaljustin.duct.typeclasses.monoid.{given,_}
 
 /** Companion object for WriterT that provides factory methods.
+  * Functional Justin https:*youtu.be/KMm71HLoy0w
+  * Ep 9: Transformers, Monads in Disguise
+  * Working with Monad Transformers can be kinda awful. In particular 
+  * I ran into many type inference issues creating this code. That's
+  * what that PartiallyApplied stuff is for in the pure and lift functions
+  * below...
  */
 object WriterT:
   /** Creates a partially applied function for lifting values into WriterT.
-   *
    * @tparam W the type of the log/output value
    * @return a partially applied function that can lift values into WriterT
    */
