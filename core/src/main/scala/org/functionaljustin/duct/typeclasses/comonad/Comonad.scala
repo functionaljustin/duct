@@ -16,11 +16,33 @@ trait Comonad[F[_]] extends Functor[F]:
 
 // Instance implementations
 
+def last[A](nel: NonEmptyList[A]): A =
+     if(nel.tail.isEmpty) 
+        nel.head
+     else
+        nel.tail.last
+
+def allButLast[A](nel: NonEmptyList[A]): NonEmptyList[A] =
+  if(nel.tail.isEmpty) 
+      nel
+  else
+      NonEmptyList(nel.head, nel.tail.init*)
+
+def allButLasts[A](nel: NonEmptyList[A]): NonEmptyList[NonEmptyList[A]] = {
+  def loop(curr: NonEmptyList[A], acc: List[NonEmptyList[A]]): NonEmptyList[NonEmptyList[A]] = {
+    if (curr.tail.isEmpty) NonEmptyList(curr, acc*)
+    else loop(allButLast(curr), curr :: acc)
+  }
+  loop(nel, Nil).reverse
+}
+
 given nonEmptyListComonad: Comonad[NonEmptyList] with
     extension [A, B](nel: NonEmptyList[A]) 
-        def extract = nel.head
+        def extract = last(nel)
 
-        def coflatMap(f: NonEmptyList[A] => B): NonEmptyList[B] = nel.tails.map(f)
+        def coflatMap(f: NonEmptyList[A] => B): NonEmptyList[B] = 
+            allButLasts(nel).map(f).reverse
+
         def map(f: A => B): NonEmptyList[B] = nel.map(f)
 
 given coReaderComonad[R]: Comonad[[X] =>> CoReader[R,X]] with

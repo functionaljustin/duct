@@ -16,13 +16,22 @@ class ComonadTestSuite extends munit.FunSuite {
   test("NonEmptyList extract") {
     assertEquals(cm.extract(NonEmptyList(1)),1)
   }
-  test("NonEmptyList coflatMap") {
-    assertEquals(NonEmptyList(1,2,3).coflatMap(identity), NonEmptyList(
-      NonEmptyList(1,2,3), NonEmptyList(2,3), NonEmptyList(3)
-      ))
+  test("NonEmptyList left identity") {
+    val input = NonEmptyList(2,3,4)
+    assertEquals(input.coflatMap(cm.extract), input)
   }
-  test("NonEmptyList extract 2") {
-    assertEquals(cm.extract(NonEmptyList(1)),1)
+  test("NonEmptyList right identity") {
+    val input = NonEmptyList(2, 3, 4)
+    val f: NonEmptyList[Int] => Int = nel => nel.head * 2 // Example function: doubles the head
+    assertEquals(cm.extract(input.coflatMap(f)), f(input))
+  }
+  test("NonEmptyList associativity") {
+    val input = NonEmptyList(2, 3, 4)
+    val f: NonEmptyList[Int] => Int = nel => nel.head + 1 // Adds 1 to the head
+    val g: NonEmptyList[Int] => Int = nel => nel.head * 2 // Doubles the head
+    val left = input.coflatMap(f).coflatMap(g)
+    val right = input.coflatMap(x => g(input.coflatMap(f)))
+    assertEquals(left, right)
   }
   test("Compose") {
     // Whilst there is no implementation of compose in my Comonad it's 
@@ -31,7 +40,7 @@ class ComonadTestSuite extends munit.FunSuite {
     val nel1 = NonEmptyList(1,2,3)
     val avg = nel1.foldLeft(0){
       case (acc, a: Int) => {
-        println(acc + " " + a);
+        // println(acc + " " + a);
         acc + a
       }
     }
