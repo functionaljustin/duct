@@ -7,7 +7,7 @@ import java.io.IOException;
 object SoundExampleForScala:
   def main(args: Array[String]): Unit = {
     // Parse the duration from the command-line arguments
-    val duration: Int = if (args.length > 0) args(0).toInt else 10
+    val duration: Int = if (args.length > 0) args(0).toInt else 3
 
     // Set the audio format and parameters
     val format = new AudioFormat(44100, 16, 1, true, false)
@@ -33,6 +33,7 @@ object SoundExampleForScala:
       bytes(i * 2) = (value & 0xFF).toByte
       bytes(i * 2 + 1) = ((value >> 8) & 0xFF).toByte
     }
+    // 
 
     // Create a new audio input stream from the Array[Byte] array
     val stream = new AudioInputStream(new ByteArrayInputStream(bytes), format, bytes.length / format.getFrameSize)
