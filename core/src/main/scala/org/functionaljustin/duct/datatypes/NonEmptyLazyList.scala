@@ -152,3 +152,17 @@ object NonEmptyLazyList:
      * @return an infinite non-empty lazy list where each element is derived from the previous one
      */
     def iterate[A](a: A)(next: A => A): NonEmptyLazyList[A] = NonEmptyLazyList.cons(a,LazyList.iterate(next(a))(next))
+
+    /** Builds a non empty lazy list from a seed value and a function for generating
+     * both the next element and the next seed value.
+     * 
+     * @tparam A the type of the non empty lazy list elements
+     * @tparam S the type of the state used to generate elements
+     * @param state the initial state
+     * @param f the function that takes the current state and returns
+     *          the next element and next state
+     * @return a non empty lazy list built from the seed value and the generator function
+     */
+    def unfold[A, S](state: S)(f: S => (A, S)): NonEmptyLazyList[A] =
+      val (a, ns) = f(state)
+      NonEmptyLazyList.cons(a, NonEmptyLazyList.unfold(ns)(f).toLazyList)

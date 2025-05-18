@@ -2,8 +2,24 @@ package examples
 
 import javax.sound.sampled.{AudioSystem, AudioFormat, SourceDataLine, DataLine}
 import java.io.File
+import org.functionaljustin.duct.datatypes.NonEmptyLazyList
 
 object SoundFilter:
+
+  // Using the NonEmptyLazyList to read the audio stream
+  // Means write a function that creates a closure and uses unfold to 
+  // read the elements of the stream, it should loop over them
+  // Note there is no way to release the stream and it is dependent on the caller
+  def readToNonEmptyLazyList(stream: java.io.InputStream): NonEmptyLazyList[Byte] =
+    val bytes = stream.readAllBytes()
+    assert(bytes.nonEmpty, "Input stream cannot be empty for NonEmptyLazyList.")
+
+    NonEmptyLazyList.unfold(0) { currentIndex =>
+      val element = bytes(currentIndex)
+      val nextIndex = (currentIndex + 1) % bytes.length
+      (element, nextIndex)
+    }
+
   // Start with a simple hello world program
   def main(args: Array[String]): Unit =
     val sampleFile = if args.length > 0 then args(0) else "/Users/justinhj/Downloads/6894__timbre__vintage-78-rpm-style/108373__timbre__vintage-in-78-rpm-style.wav"
