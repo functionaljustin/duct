@@ -2,23 +2,20 @@ package examples
 
 import javax.sound.sampled.{AudioSystem, AudioFormat, SourceDataLine, DataLine}
 import java.io.File
+import java.io.ByteArrayInputStream
+import java.nio.file.Files
 import org.functionaljustin.duct.datatypes.NonEmptyLazyList
 
 object SoundFilter:
-
-  // Using the NonEmptyLazyList to read the audio stream
-  // Means write a function that creates a closure and uses unfold to 
-  // read the elements of the stream, it should loop over them
-  // Note there is no way to release the stream and it is dependent on the caller
-  def readToNonEmptyLazyList(stream: java.io.InputStream): NonEmptyLazyList[Byte] =
-    val bytes = stream.readAllBytes()
-    assert(bytes.nonEmpty, "Input stream cannot be empty for NonEmptyLazyList.")
-
+  // Read the entire file into a NonEmptyLazyList[Byte]
+  def readToNonEmptyLazyListFromFile(file: File): NonEmptyLazyList[Byte] =
+    val bytes = Files.readAllBytes(file.toPath)
+    assert(bytes.nonEmpty, "Input file cannot be empty for NonEmptyLazyList.")
     NonEmptyLazyList.unfold(0) { currentIndex =>
       val element = bytes(currentIndex)
-      val nextIndex = (currentIndex + 1) % bytes.length
+      val nextIndex = currentIndex + 1
       (element, nextIndex)
-    }
+    }.take(bytes.length)
 
   // Start with a simple hello world program
   def main(args: Array[String]): Unit =
@@ -26,42 +23,36 @@ object SoundFilter:
     // The compiler handles checking if an argument is provided and parsing it as a String
     println(s"Loading sample ${sampleFile}")
 
-    // Load audio input stream
-    val audioInputStream = AudioSystem.getAudioInputStream(new File(sampleFile))
-    val audioFormat = audioInputStream.getFormat
-    println(s"Audio format: ${audioFormat}")
+    // Read file into NonEmptyLazyList[Byte]
+    val file = new File(sampleFile)
+    val len = file.length()
+    println(s"File length is ${len} bytes")
 
-    // Prepare SourceDataLine for playback
-    val info = new DataLine.Info(classOf[SourceDataLine], audioFormat)
-    val line = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
-    line.open(audioFormat)
-    line.start()
+    // val nel = readToNonEmptyLazyListFromFile(file)
+    // val bytes = nel.toLazyList.take(4097).toList
+    // println(s"First 256 bytes: ${bytes.mkString(",")}")
+    // val bytes = nel.take(len.toInt).toList.toArray
+    // val audioInputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(bytes))
+    // val audioFormat = audioInputStream.getFormat
+    // println(s"Audio format: ${audioFormat}")
 
-    // Buffer for reading and processing audio
-    val buffer = new Array[Byte](4096)
-    var bytesRead = 0
-    var totalBytes = 0L
+    // // Prepare SourceDataLine for playback
+    // val info = new DataLine.Info(classOf[SourceDataLine], audioFormat)
+    // val line = AudioSystem.getLine(info).asInstanceOf[SourceDataLine]
+    // line.open(audioFormat)
+    // line.start()
 
-    // Read, (optionally process), and play audio
-    while {
-      bytesRead = audioInputStream.read(buffer, 0, buffer.length)
-      bytesRead != -1
-    } do
-      // Implement a min filter
-      val what = buffer.take(bytesRead).map(b => {
-        // min filter, clip the byte to -20 to 20
-        // if(b > -20 && b < 20) {
-        //   0
-        // } else b
-        b
-
-      })       
-      line.write(what, 0, bytesRead)
-      totalBytes += bytesRead
+    // val chunkSize = 256
+    // var totalBytes = 0L
+    
+    // while(totalBytes < 1_000_000)
+    //   val chunk = nel.take(chunkSize).toList.toArray
+    //   line.write(chunk, 0, chunk.length)
+    //   totalBytes += chunk.length
 
     // Clean up
-    line.drain()
-    line.stop()
-    line.close()
-    audioInputStream.close()
-    println(s"Playback finished. Total bytes played: $totalBytes")
+    // line.drain()
+    // line.stop()
+    // line.close()
+    // audioInputStream.close()
+    // println(s"Playback finished. Total bytes played: $totalBytes")
