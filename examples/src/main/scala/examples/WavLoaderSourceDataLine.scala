@@ -1,24 +1,22 @@
 package examples
 
 import javax.sound.sampled._
-import java.io.{File, IOException, ByteArrayOutputStream}
+import java.io.{ByteArrayOutputStream, IOException}
 import scala.util.{Try, Using}
 import java.io.File
-import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import org.functionaljustin.duct.datatypes.NonEmptyLazyList
 
 object WavLoaderSourceDataLine {
-  def readToNonEmptyLazyListFromFile(file: File): NonEmptyLazyList[Byte] =
-    val bytes = Files.readAllBytes(file.toPath)
-    assert(bytes.nonEmpty, "Input file cannot be empty for NonEmptyLazyList.")
+  def readToNonEmptyLazyListFromFile(input: Array[Byte]): NonEmptyLazyList[Byte] = {
+    assert(input.nonEmpty, "Input array cannot be empty for NonEmptyLazyList.")
     NonEmptyLazyList
       .unfold(0) { currentIndex =>
-        val element = bytes(currentIndex)
-        val nextIndex = currentIndex + 1
+        val element = input(currentIndex)
+        val nextIndex = (currentIndex + 1) % input.length
         (element, nextIndex)
       }
-      .take(bytes.length)
+  }
 
   def main(args: Array[String]): Unit = {
     val wavFilePath =
@@ -54,7 +52,7 @@ object WavLoaderSourceDataLine {
       val info = new DataLine.Info(classOf[SourceDataLine], audioFormat)
       if (!AudioSystem.isLineSupported(info)) {
         println("Line not supported for the given audio format.")
-        return
+        System.exit(1)
       }
 
       Using(AudioSystem.getLine(info).asInstanceOf[SourceDataLine]) {
@@ -63,8 +61,27 @@ object WavLoaderSourceDataLine {
           sourceDataLine.open(audioFormat)
           sourceDataLine.start()
 
-          // Write the audio data to the line
-          sourceDataLine.write(audioData, 0, audioData.length)
+          // Create NonEmptyLazyList from audioData
+          val audioStream = readToNonEmptyLazyListFromFile(audioData)
+          val chunkSize = 256 // Same as buffer size
+          var loopCount = 0
+          val maxLoops = 10 // Number of times to loop the audio
+
+          // Function to process chunks and loop
+          def playLoop(currentStream: NonEmptyLazyList[Byte], loops: Int): Unit = {
+            if (loops >= maxLoops) return // Stop after maxLoops
+
+            // Take a chunk of bytes
+            val chunk = currentStream.take(chunkSize).toList.toArray
+            sourceDataLine.write(chunk, 0, chunk.length)
+
+            // Move to next chunk
+            val nextStream = currentStream.drop(chunkSize)
+            playLoop(nextStream, loops)
+          }
+
+          // Start playback loop
+          playLoop(audioStream, 0)
 
           // Wait for the playback to complete
           sourceDataLine.drain()

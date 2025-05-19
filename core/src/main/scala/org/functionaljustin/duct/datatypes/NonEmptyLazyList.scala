@@ -111,6 +111,10 @@ sealed trait NonEmptyLazyList[+A]:
       val ll = this.toLazyList.take(n)
       NonEmptyLazyList.cons(ll.head, ll.tail)        
 
+    def drop(n: Int): NonEmptyLazyList[A] =
+      val ll = this.toLazyList.drop(n)
+      NonEmptyLazyList.cons(ll.head, ll.tail)
+
 /** Factory methods and operations for non-empty lazy lists.
  */
 object NonEmptyLazyList:
