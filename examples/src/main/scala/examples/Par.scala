@@ -3,14 +3,18 @@ package examples
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicReference
 
-object ParExample extends App:
+object ParExample:
   
+  // A Future is "registering a callback to be invoked when a result is ready"
   opaque type Future[+A] = (A => Unit) => Unit
+  // Par requires applying an executor service which gives the Future
   opaque type Par[+A] = ExecutorService => Future[A]
 
   object Par:
     def unit[A](a: A): Par[A] =
-      es => cb => cb(a)
+      val f : Future[A] = cb => cb(a)
+      val p : Par[A] = es => f
+      p
 
     def delay[A](a: => A): Par[A] =
       es => cb => cb(a)
@@ -46,18 +50,18 @@ object ParExample extends App:
     latch.await
     ref.get
 
-  val es = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors)
-
-
   def p1(w: Int) = {
     Thread.sleep(w)
     println(s"p1 finished waiting for ${w}ms on thread ${Thread.currentThread.getName()}")
     w
   }
 
-  val par1 = Par.fork(Par.delay(p1(123)))
-  val par2 = Par.fork(Par.delay(p1(377)))
-  val result = Par.map2(par1, par2)((a,b) => a + b).run(es)
-  println(s"Got $result from thread ${Thread.currentThread.getName()}")
+  def main(args: Array[String]): Unit =
+    val es = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors)
 
-  es.shutdown()
+    val par1 = Par.fork(Par.unit(p1(1230)))
+    val par2 = Par.fork(Par.unit(p1(3770)))
+    val result = Par.map2(par1, par2)((a,b) => a + b).run(es)
+    println(s"Got $result from thread ${Thread.currentThread.getName()}")
+
+    es.shutdown()
