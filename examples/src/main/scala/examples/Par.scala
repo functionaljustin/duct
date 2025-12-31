@@ -82,18 +82,19 @@ object ParExample:
         pa(es) { a => future.complete(a) } // Set the result in the CompletableFuture
         future.join() // Block until the result is available and return it
 
-  def p1(w: Int) = {
-    Thread.sleep(w)
-    println(s"p1 finished waiting for ${w}ms on thread ${Thread.currentThread.getName()}")
-    w
-  }
-
   def main(args: Array[String]): Unit =
     import Par.*
+
+    def example1(w: Int) = {
+      Thread.sleep(w)
+      println(s"example1 finished waiting for ${w}ms on thread ${Thread.currentThread.getName()}")
+      w
+    }
+
     val es = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors)
 
-    val par1 = Par.fork(Par.unit(p1(1230)))
-    val par2 = Par.fork(Par.unit(p1(3770)))
+    val par1 = Par.fork(Par.unit(example1(1230)))
+    val par2 = Par.fork(Par.unit(example1(3770)))
     val result = par1.map2Actor(par2)((a,b) => a + b).run(es)
     println(s"Got $result from thread ${Thread.currentThread.getName()}")
 
