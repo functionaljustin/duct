@@ -1,0 +1,303 @@
+//> using scala "3.5.2"
+
+/*
+ * LawfulFFT — a real-time spectrum display whose core is a comonad.
+ *
+ * The pitch for the video/post:
+ *
+ *   `samples.coflatMap(spectrumAt)` denotes "the spectrum at every instant"
+ *   as a single timeless, pure value. It says nothing about microphones,
+ *   buffer sizes, or redraw timing. The driver loop at the bottom — blocking
+ *   on the mic, advancing by hops, redrawing the screen — lives deliberately
+ *   OUTSIDE the comonad. The comonad gives you the denotation; the driver
+ *   gives you the pacing.
+ *
+ * Zero dependencies: the Comonad[NonEmptyLazyList] instance is inlined below
+ * (extract = head, coflatMap via tails — the suffix semantics). If your
+ * `duct` library is on the classpath, delete the `Comonad` trait and the
+ * `given` and `import duct.*` instead: the instance there has exactly these
+ * semantics, so nothing else changes.
+ *
+ * Run:   scala-cli run LawfulFFT.sc
+ *        scala-cli run LawfulFFT.sc -- --test-tone   (synth signal, no mic)
+ * Quit:  q + Enter, or Ctrl-C. (macOS will ask for mic permission once.)
+ */
+
+// ---------------------------------------------------------------------------
+// 1. The stream type: a lazy list that is guaranteed non-empty.
+//    Totality is the whole point — `extract` on an empty list would be partial,
+//    which is why cats won't ship a lazy-list comonad and why the NonEmpty
+//    wrapper is what makes the instance lawful.
+// ---------------------------------------------------------------------------
+
+package examples
+
+final class NELazy[+A] private (val head: A, tail0: => Option[NELazy[A]]):
+  lazy val tail: Option[NELazy[A]] = tail0
+
+  def map[B](f: A => B): NELazy[B] =
+    NELazy.cons(f(head), tail.map(_.map(f)))
+
+  /** Every suffix of this stream, as a stream. This is `duplicate`. */
+  def tails: NELazy[NELazy[A]] =
+    NELazy.cons(this, tail.map(_.tails))
+
+  def take(n: Int): List[A] =
+    @annotation.tailrec def go(s: NELazy[A], n: Int, acc: List[A]): List[A] =
+      if n <= 0 then acc.reverse
+      else s.tail match
+        case Some(t) => go(t, n - 1, s.head :: acc)
+        case None    => (s.head :: acc).reverse
+    go(this, n, Nil)
+
+object NELazy:
+  def cons[A](h: A, t: => Option[NELazy[A]]): NELazy[A] = new NELazy(h, t)
+
+// ---------------------------------------------------------------------------
+// 2. The comonad. Needs Functor for the default coflatMap; extract/duplicate
+//    are the whole interface, and both are total here.
+// ---------------------------------------------------------------------------
+
+trait Comonad[W[_]]:
+  extension [A, B](w: W[A]) def map(f: A => B): W[B]
+  extension [A](w: W[A]) def extract: A
+  extension [A](w: W[A]) def duplicate: W[W[A]]
+  extension [A, B](w: W[A]) def coflatMap(f: W[A] => B): W[B] =
+    w.duplicate.map(f)
+
+given Comonad[NELazy] with
+  extension [A, B](w: NELazy[A]) def map(f: A => B): NELazy[B] = w.map(f)
+  extension [A](w: NELazy[A]) def extract: A = w.head
+  extension [A](w: NELazy[A]) def duplicate: NELazy[NELazy[A]] = w.tails
+
+// ---------------------------------------------------------------------------
+// 3. Signal processing: hand-rolled Cooley–Tukey (~35 lines), Hann window,
+//    log-spaced bars on a dB scale.
+// ---------------------------------------------------------------------------
+
+object FFT:
+  /** Real-input FFT; returns linear magnitudes of the first n/2 bins. */
+  def magnitudeSpectrum(samples: Array[Double]): Array[Double] =
+    val n = samples.length
+    require((n & (n - 1)) == 0, "window size must be a power of two")
+    val re = samples.clone()
+    val im = new Array[Double](n)
+
+    var j = 0
+    var i = 1
+    while i < n do // bit-reversal permutation
+      var bit = n >> 1
+      while (j & bit) != 0 do { j ^= bit; bit >>= 1 }
+      j ^= bit
+      if i < j then
+        val t = re(i); re(i) = re(j); re(j) = t
+      i += 1
+
+    var len = 2
+    while len <= n do // butterflies
+      val ang = -2.0 * math.Pi / len
+      val wr = math.cos(ang)
+      val wi = math.sin(ang)
+      var k = 0
+      while k < n do
+        var cwr = 1.0
+        var cwi = 0.0
+        var m = 0
+        while m < len / 2 do
+          val ur = re(k + m)
+          val ui = im(k + m)
+          val vr = re(k + m + len / 2) * cwr - im(k + m + len / 2) * cwi
+          val vi = re(k + m + len / 2) * cwi + im(k + m + len / 2) * cwr
+          re(k + m) = ur + vr
+          im(k + m) = ui + vi
+          re(k + m + len / 2) = ur - vr
+          im(k + m + len / 2) = ui - vi
+          val nwr = cwr * wr - cwi * wi
+          cwi = cwr * wi + cwi * wr
+          cwr = nwr
+          m += 1
+        k += len
+      len <<= 1
+
+    val out = new Array[Double](n / 2)
+    var b = 0
+    while b < n / 2 do
+      out(b) = math.sqrt(re(b) * re(b) + im(b) * im(b)) / n
+      b += 1
+    out
+
+val WindowSize = 2048
+val Hop        = 1024
+val Bars       = 64
+val Rows       = 20
+
+/** The context-dependent local computation: window + FFT of one suffix. */
+def spectrumAt(suffix: NELazy[Double]): Array[Double] =
+  val buf = new Array[Double](WindowSize)
+  var s = suffix
+  var i = 0
+  while i < WindowSize do
+    val hann = 0.5 * (1.0 - math.cos(2.0 * math.Pi * i / (WindowSize - 1)))
+    buf(i) = s.head * hann
+    s = s.tail.getOrElse(s) // finite stream: hold the last sample
+    i += 1
+  toBars(FFT.magnitudeSpectrum(buf), Bars)
+
+/** Log-spaced bin aggregation, -90..0 dB mapped to 0..1. */
+def toBars(mags: Array[Double], bars: Int): Array[Double] =
+  val out = new Array[Double](bars)
+  var b = 0
+  while b < bars do
+    val lo = math.pow(mags.length, b.toDouble / bars).toInt.min(mags.length - 1)
+    val hi = math.pow(mags.length, (b + 1).toDouble / bars).toInt.max(lo + 1).min(mags.length)
+    var peak = 0.0
+    var k = lo
+    while k < hi do
+      if mags(k) > peak then peak = mags(k)
+      k += 1
+    val db = 20.0 * math.log10(peak + 1e-12)
+    out(b) = ((db + 90.0) / 90.0).min(1.0).max(0.0)
+    b += 1
+  out
+
+// ---------------------------------------------------------------------------
+// 4. Sources: the mic (javax.sound.sampled, no deps) or a synth test tone.
+//    Both are infinite NELazy[Double] — the comonad can't tell them apart,
+//    which is exactly the denotation/operation split doing its job.
+// ---------------------------------------------------------------------------
+
+object Mic:
+  import javax.sound.sampled.*
+
+  def openStream(sampleRateHz: Float = 44100f): NELazy[Double] =
+    val fmt = new AudioFormat(sampleRateHz, 16, 1, true, false)
+    val line =
+      try AudioSystem.getTargetDataLine(fmt)
+      catch
+        case e: Exception =>
+          System.err.println(s"no microphone available (${e.getMessage}); try --test-tone")
+          sys.exit(1)
+    line.open(fmt, 16384)
+    line.start()
+    Runtime.getRuntime.addShutdownHook(new Thread(() => { line.stop(); line.close() }))
+
+    val queue = new java.util.concurrent.LinkedBlockingQueue[Double](1 << 16)
+    val feeder = new Thread(() =>
+      val buf = new Array[Byte](4096)
+      var go = true
+      while go do
+        try
+          val n = line.read(buf, 0, buf.length)
+          if n <= 0 then go = false
+          else
+            var i = 0
+            while i + 1 < n do
+              val lo = buf(i) & 0xff
+              val hi = buf(i + 1) // widened: sign-extended
+              queue.put((((hi << 8) | lo).toShort) / 32768.0)
+              i += 2
+        catch case _: InterruptedException => go = false
+    , "mic-feeder")
+    feeder.setDaemon(true)
+    feeder.start()
+
+    def pull(): NELazy[Double] =
+      NELazy.cons(queue.take(), Some(pull())) // take() blocks: backpressure for free
+    pull()
+
+/** Deterministic synth signal — same type as the mic, for demos without one. */
+def testToneStream(sampleRateHz: Double): NELazy[Double] =
+  def go(t: Long): NELazy[Double] =
+    val x = t / sampleRateHz
+    val sweepHz = 200 + 600 * (0.5 + 0.5 * math.sin(2 * math.Pi * 0.1 * x))
+    val v = 0.45 * math.sin(2 * math.Pi * 220 * x)
+          + 0.30 * math.sin(2 * math.Pi * 440 * x)
+          + 0.25 * math.sin(2 * math.Pi * sweepHz * x)
+    NELazy.cons(v, Some(go(t + 1)))
+  go(0)
+
+// ---------------------------------------------------------------------------
+// 5. The "TUI library": six escape codes and the block characters.
+//    Alternate screen + hidden cursor; restored on exit come what may.
+// ---------------------------------------------------------------------------
+
+object TUI:
+  def enter(): Unit =
+    print("\u001b[?1049h\u001b[?25l")
+    System.out.flush()
+  def exit(): Unit =
+    print("\u001b[?25h\u001b[?1049l")
+    System.out.flush()
+  def render(bars: Array[Double], rows: Int): Unit =
+    val sb = new StringBuilder("\u001b[H")
+    sb.append("lawful fft — comonad denotation, driver pacing   (q + Enter to quit)\n")
+    var r = rows - 1
+    while r >= 0 do
+      val thresh = r.toDouble / rows
+      var b = 0
+      while b < bars.length do
+        sb.append(if bars(b) >= thresh then '█' else ' ')
+        b += 1
+      sb.append('\n')
+      r -= 1
+    print(sb.toString())
+    System.out.flush()
+
+def advance[A](s: NELazy[A], n: Int): NELazy[A] =
+  var cur = s
+  var i = 0
+  while i < n do
+    cur = cur.tail.getOrElse(cur)
+    i += 1
+  cur
+
+// ---------------------------------------------------------------------------
+// 6. The driver: everything operational lives here, outside the comonad.
+// ---------------------------------------------------------------------------
+
+object LawfulFFT:
+
+
+  def main(args: Array[String]): Unit =
+
+
+    val useTestTone = args.contains("--test-tone")
+
+    // THE LAWFUL CORE, one line: the spectrum at every instant, timelessly.
+    // Rebuilt per frame from the advanced sample cursor: `NELazy.map` is
+    // head-strict (cons takes its head by value), so stepping the *spectra*
+    // stream would force one FFT per hop — 1024 wasted FFTs per frame.
+    // Stepping the *sample* cursor and forcing `.head` evaluates exactly the
+    // spectrum displayed and nothing else; the rest of the infinite
+    // denotation is never evaluated.
+    // NOTE: keep only the current sample cursor in `samples`. Tails are
+    // memoized, so retaining the stream root would pin every consumed sample
+    // forever; advancing the cursor lets the prefix be GC'd.
+    var samples: NELazy[Double] =
+      if useTestTone then testToneStream(44100.0)
+      else Mic.openStream(44100f)
+
+    @volatile var running = true
+    val keys = new Thread(() =>
+      val in = new java.util.Scanner(System.in)
+      while running && in.hasNextLine() do
+        if in.nextLine().trim.equalsIgnoreCase("q") then running = false
+    , "key-reader")
+    keys.setDaemon(true)
+    keys.start()
+
+    TUI.enter()
+    Runtime.getRuntime.addShutdownHook(new Thread(() => TUI.exit()))
+    try
+      while running do
+        val spectra = samples.coflatMap(spectrumAt) // lawful core, rebuilt per frame
+        TUI.render(spectra.head, Rows) // the only spectrum we ever force
+        samples = advance(samples, Hop) // hop the samples, never look back
+        // The mic stream self-throttles (queue.take() blocks), but the synth
+        // stream never blocks — without pacing, test-tone mode would render as
+        // fast as the terminal allows and spin the CPU. Pace it like mic mode.
+        if useTestTone then Thread.sleep(23)
+    finally
+      running = false
+      TUI.exit()
+
