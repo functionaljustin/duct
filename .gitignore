@@ -12,3 +12,4 @@ target/
 out/
 project/.bloop/
 project/metals.sbt
+.agents/

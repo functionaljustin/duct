@@ -214,19 +214,16 @@ object LawfulFFT:
 
   def main(args: Array[String]): Unit =
 
-
     val useTestTone = args.contains("--test-tone")
 
     // THE LAWFUL CORE, one line: the spectrum at every instant, timelessly.
-    // Rebuilt per frame from the advanced sample cursor: `NonEmptyLazyList.map` is
-    // head-strict (cons takes its head by value), so stepping the *spectra*
-    // stream would force one FFT per hop — 1024 wasted FFTs per frame.
-    // Stepping the *sample* cursor and forcing `.head` evaluates exactly the
-    // spectrum displayed and nothing else; the rest of the infinite
-    // denotation is never evaluated.
-    // NOTE: keep only the current sample cursor in `samples`. Tails are
-    // memoized, so retaining the stream root would pin every consumed sample
-    // forever; advancing the cursor lets the prefix be GC'd.
+    // Rebuilt per frame from the advanced sample cursor. Strictness note:
+    // duct's NonEmptyLazyList.cons takes its head by-name (stored as a lazy
+    // val), so stepping the *spectra* stream would not itself force the FFTs
+    // — only `.head` evaluates spectrumAt. Rebuilding per frame keeps the 
+    // operational story obvious — exactly one spectrum forced per frame — and 
+    // lets the previous frame's spectra be GC'd instead of retaining memoized
+    // nodes.
     var samples: NonEmptyLazyList[Double] =
       if useTestTone then testToneStream(44100.0)
       else Mic.openStream(44100f)
