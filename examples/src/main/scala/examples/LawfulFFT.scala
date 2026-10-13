@@ -224,6 +224,9 @@ object LawfulFFT:
     // operational story obvious — exactly one spectrum forced per frame — and 
     // lets the previous frame's spectra be GC'd instead of retaining memoized
     // nodes.
+    // NOTE: keep only the current sample cursor in `samples`. Tails are
+    // memoized, so retaining the stream root would pin every consumed sample
+    // forever; advancing the cursor lets the prefix be GC'd.
     var samples: NonEmptyLazyList[Double] =
       if useTestTone then testToneStream(44100.0)
       else Mic.openStream(44100f)
