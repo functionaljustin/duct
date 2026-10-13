@@ -10,14 +10,12 @@
  *   OUTSIDE the comonad. The comonad gives you the denotation; the driver
  *   gives you the pacing.
  *
- * Zero dependencies: the Comonad[NonEmptyLazyList] instance is inlined below
- * (extract = head, coflatMap via tails — the suffix semantics). If your
- * `duct` library is on the classpath, delete the `Comonad` trait and the
- * `given` and `import duct.*` instead: the instance there has exactly these
- * semantics, so nothing else changes.
+ * Uses the Comonad[NonEmptyLazyList] instance from duct (extract = head,
+ * coflatMap via tails — the suffix semantics). No other dependencies: audio
+ * capture is plain javax.sound.sampled and the TUI is raw ANSI escapes.
  *
- * Run:   sbt "examples/runMain examples.LawfulFFT" 
-          sbt "examples/runMain examples.LawfulFFT -- --test-tone"
+ * Run:   sbt "examples/runMain examples.LawfulFFT"
+ *        sbt "examples/runMain examples.LawfulFFT --test-tone"
  * Quit:  q + Enter, or Ctrl-C. (macOS will ask for mic permission once.)
  */
 
