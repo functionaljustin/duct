@@ -1,9 +1,7 @@
-//> using scala "3.5.2"
-
 /*
  * LawfulFFT — a real-time spectrum display whose core is a comonad.
  *
- * The pitch for the video/post:
+ * Ideas for subsequent video/post:
  *
  *   `samples.coflatMap(spectrumAt)` denotes "the spectrum at every instant"
  *   as a single timeless, pure value. It says nothing about microphones,
@@ -18,60 +16,18 @@
  * `given` and `import duct.*` instead: the instance there has exactly these
  * semantics, so nothing else changes.
  *
- * Run:   scala-cli run LawfulFFT.sc
- *        scala-cli run LawfulFFT.sc -- --test-tone   (synth signal, no mic)
+ * Run:   sbt "examples/runMain examples.LawfulFFT" 
+          sbt "examples/runMain examples.LawfulFFT -- --test-tone"
  * Quit:  q + Enter, or Ctrl-C. (macOS will ask for mic permission once.)
  */
 
-// ---------------------------------------------------------------------------
-// 1. The stream type: a lazy list that is guaranteed non-empty.
-//    Totality is the whole point — `extract` on an empty list would be partial,
-//    which is why cats won't ship a lazy-list comonad and why the NonEmpty
-//    wrapper is what makes the instance lawful.
-// ---------------------------------------------------------------------------
-
 package examples
 
-final class NELazy[+A] private (val head: A, tail0: => Option[NELazy[A]]):
-  lazy val tail: Option[NELazy[A]] = tail0
-
-  def map[B](f: A => B): NELazy[B] =
-    NELazy.cons(f(head), tail.map(_.map(f)))
-
-  /** Every suffix of this stream, as a stream. This is `duplicate`. */
-  def tails: NELazy[NELazy[A]] =
-    NELazy.cons(this, tail.map(_.tails))
-
-  def take(n: Int): List[A] =
-    @annotation.tailrec def go(s: NELazy[A], n: Int, acc: List[A]): List[A] =
-      if n <= 0 then acc.reverse
-      else s.tail match
-        case Some(t) => go(t, n - 1, s.head :: acc)
-        case None    => (s.head :: acc).reverse
-    go(this, n, Nil)
-
-object NELazy:
-  def cons[A](h: A, t: => Option[NELazy[A]]): NELazy[A] = new NELazy(h, t)
+import org.functionaljustin.duct.datatypes.NonEmptyLazyList
+import org.functionaljustin.duct.typeclasses.comonad.{given, _}
 
 // ---------------------------------------------------------------------------
-// 2. The comonad. Needs Functor for the default coflatMap; extract/duplicate
-//    are the whole interface, and both are total here.
-// ---------------------------------------------------------------------------
-
-trait Comonad[W[_]]:
-  extension [A, B](w: W[A]) def map(f: A => B): W[B]
-  extension [A](w: W[A]) def extract: A
-  extension [A](w: W[A]) def duplicate: W[W[A]]
-  extension [A, B](w: W[A]) def coflatMap(f: W[A] => B): W[B] =
-    w.duplicate.map(f)
-
-given Comonad[NELazy] with
-  extension [A, B](w: NELazy[A]) def map(f: A => B): NELazy[B] = w.map(f)
-  extension [A](w: NELazy[A]) def extract: A = w.head
-  extension [A](w: NELazy[A]) def duplicate: NELazy[NELazy[A]] = w.tails
-
-// ---------------------------------------------------------------------------
-// 3. Signal processing: hand-rolled Cooley–Tukey (~35 lines), Hann window,
+// Signal processing: hand-rolled Cooley–Tukey (~35 lines), Hann window,
 //    log-spaced bars on a dB scale.
 // ---------------------------------------------------------------------------
 
@@ -132,14 +88,14 @@ val Bars       = 64
 val Rows       = 20
 
 /** The context-dependent local computation: window + FFT of one suffix. */
-def spectrumAt(suffix: NELazy[Double]): Array[Double] =
+def spectrumAt(suffix: NonEmptyLazyList[Double]): Array[Double] =
   val buf = new Array[Double](WindowSize)
   var s = suffix
   var i = 0
   while i < WindowSize do
     val hann = 0.5 * (1.0 - math.cos(2.0 * math.Pi * i / (WindowSize - 1)))
     buf(i) = s.head * hann
-    s = s.tail.getOrElse(s) // finite stream: hold the last sample
+    s = s.tailOption.getOrElse(s) // finite stream: hold the last sample
     i += 1
   toBars(FFT.magnitudeSpectrum(buf), Bars)
 
@@ -162,14 +118,14 @@ def toBars(mags: Array[Double], bars: Int): Array[Double] =
 
 // ---------------------------------------------------------------------------
 // 4. Sources: the mic (javax.sound.sampled, no deps) or a synth test tone.
-//    Both are infinite NELazy[Double] — the comonad can't tell them apart,
+//    Both are infinite NonEmptyLazyList[Double] — the comonad can't tell them apart,
 //    which is exactly the denotation/operation split doing its job.
 // ---------------------------------------------------------------------------
 
 object Mic:
   import javax.sound.sampled.*
 
-  def openStream(sampleRateHz: Float = 44100f): NELazy[Double] =
+  def openStream(sampleRateHz: Float = 44100f): NonEmptyLazyList[Double] =
     val fmt = new AudioFormat(sampleRateHz, 16, 1, true, false)
     val line =
       try AudioSystem.getTargetDataLine(fmt)
@@ -201,19 +157,19 @@ object Mic:
     feeder.setDaemon(true)
     feeder.start()
 
-    def pull(): NELazy[Double] =
-      NELazy.cons(queue.take(), Some(pull())) // take() blocks: backpressure for free
+    def pull(): NonEmptyLazyList[Double] =
+      NonEmptyLazyList.cons(queue.take(), pull().toLazyList) // take() blocks: backpressure for free
     pull()
 
 /** Deterministic synth signal — same type as the mic, for demos without one. */
-def testToneStream(sampleRateHz: Double): NELazy[Double] =
-  def go(t: Long): NELazy[Double] =
+def testToneStream(sampleRateHz: Double): NonEmptyLazyList[Double] =
+  def go(t: Long): NonEmptyLazyList[Double] =
     val x = t / sampleRateHz
     val sweepHz = 200 + 600 * (0.5 + 0.5 * math.sin(2 * math.Pi * 0.1 * x))
     val v = 0.45 * math.sin(2 * math.Pi * 220 * x)
           + 0.30 * math.sin(2 * math.Pi * 440 * x)
           + 0.25 * math.sin(2 * math.Pi * sweepHz * x)
-    NELazy.cons(v, Some(go(t + 1)))
+    NonEmptyLazyList.cons(v, go(t + 1).toLazyList)
   go(0)
 
 // ---------------------------------------------------------------------------
@@ -243,11 +199,11 @@ object TUI:
     print(sb.toString())
     System.out.flush()
 
-def advance[A](s: NELazy[A], n: Int): NELazy[A] =
+def advance[A](s: NonEmptyLazyList[A], n: Int): NonEmptyLazyList[A] =
   var cur = s
   var i = 0
   while i < n do
-    cur = cur.tail.getOrElse(cur)
+    cur = cur.tailOption.getOrElse(cur)
     i += 1
   cur
 
@@ -264,7 +220,7 @@ object LawfulFFT:
     val useTestTone = args.contains("--test-tone")
 
     // THE LAWFUL CORE, one line: the spectrum at every instant, timelessly.
-    // Rebuilt per frame from the advanced sample cursor: `NELazy.map` is
+    // Rebuilt per frame from the advanced sample cursor: `NonEmptyLazyList.map` is
     // head-strict (cons takes its head by value), so stepping the *spectra*
     // stream would force one FFT per hop — 1024 wasted FFTs per frame.
     // Stepping the *sample* cursor and forcing `.head` evaluates exactly the
@@ -273,7 +229,7 @@ object LawfulFFT:
     // NOTE: keep only the current sample cursor in `samples`. Tails are
     // memoized, so retaining the stream root would pin every consumed sample
     // forever; advancing the cursor lets the prefix be GC'd.
-    var samples: NELazy[Double] =
+    var samples: NonEmptyLazyList[Double] =
       if useTestTone then testToneStream(44100.0)
       else Mic.openStream(44100f)
 
